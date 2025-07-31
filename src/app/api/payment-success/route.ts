@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists in Supabase
     const { data: existingUser, error: findError } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('*')
       .eq('email', email)
       .single()
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     if (existingUser && !findError) {
       // Update existing user to paid status
       const { data: updatedUser, error: updateError } = await supabase
-        .from('users')
+        .from('user_profiles')
         .update({ 
           is_paid: true,
           updated_at: new Date().toISOString()
@@ -72,16 +72,29 @@ export async function POST(request: NextRequest) {
       }
       user = updatedUser
     } else {
-      // Create new user account (they'll set password later)
+      // Create new user in Supabase auth first
+      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true
+      })
+
+      if (authError) {
+        console.error('Auth user creation error:', authError)
+        return NextResponse.json(
+          { success: false, error: 'Failed to create auth user' },
+          { status: 500 }
+        )
+      }
+
+      // Update user_profiles with payment status (the trigger should have created the profile)
       const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .insert({
-          email,
+        .from('user_profiles')
+        .update({
           is_paid: true,
           stage: 'ms1', // Default stage, will be updated during password setup
-          created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
+        .eq('id', authUser.user?.id)
         .select()
         .single()
 

@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user exists in Supabase
     const { data: user, error: findError } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('id, email')
       .eq('email', email)
       .single()
@@ -41,32 +41,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hash the password
-    const saltRounds = 12
-    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    // Update the user's password in Supabase Auth
+    const { error: passwordError } = await supabase.auth.admin.updateUserById(user.id, {
+      password: password
+    })
 
-    // Update user's password and stage
-    const updateData: any = {
-      password_hash: hashedPassword,
-      updated_at: new Date().toISOString()
-    }
-
-    // Include stage if provided
-    if (stage) {
-      updateData.stage = stage
-    }
-
-    const { error: updateError } = await supabase
-      .from('users')
-      .update(updateData)
-      .eq('email', email)
-
-    if (updateError) {
-      console.error('Update password error:', updateError)
+    if (passwordError) {
+      console.error('Password update error:', passwordError)
       return NextResponse.json(
         { success: false, error: 'Failed to set password' },
         { status: 500 }
       )
+    }
+
+    // Update user's stage if provided
+    if (stage) {
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({
+          stage: stage,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id)
+
+      if (updateError) {
+        console.error('Update stage error:', updateError)
+        // Don't fail the whole process if stage update fails
+      }
     }
 
     return NextResponse.json({
