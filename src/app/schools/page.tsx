@@ -26,7 +26,7 @@ export default function SchoolsPage() {
       queryParams.append('type', 'school')
       if (searchQuery) queryParams.append('q', searchQuery)
       
-      const response = await fetch(`/api/places?${queryParams.toString()}`)
+      const response = await fetch(`/api/supabase/places?${queryParams.toString()}`)
       const data = await response.json()
       
       if (data.success) {
