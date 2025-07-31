@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { db } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 // GET /api/reviews?place_id=123
 export async function GET(request: NextRequest) {
@@ -15,43 +20,69 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get reviews with user info (but keep anonymous)
-    const reviews = db.prepare(`
-      SELECT 
-        r.id,
-        r.rating,
-        r.tags,
-        r.body,
-        r.is_anonymous,
-        r.created_at,
-        r.updated_at,
-        u.stage,
-        u.display_name
-      FROM reviews r
-      JOIN users u ON r.user_id = u.id
-      WHERE r.place_id = ?
-      ORDER BY r.created_at DESC
-    `).all(placeId)
+    // Get reviews from Supabase
+    const { data: reviews, error } = await supabase
+      .from('reviews')
+      .select(`
+        id,
+        rating,
+        tags,
+        body,
+        is_anonymous,
+        created_at,
+        updated_at,
+        user_id
+      `)
+      .eq('place_id', placeId)
+      .order('created_at', { ascending: false })
 
-    // Parse JSON fields and format for frontend
-    const formattedReviews = reviews.map((review: any) => ({
-      id: review.id,
-      rating: review.rating,
-      tags: JSON.parse(review.tags || '[]'),
-      body: review.body,
-      is_anonymous: Boolean(review.is_anonymous),
-      created_at: review.created_at,
-      updated_at: review.updated_at,
-      author: {
-        stage: review.stage,
-        display_name: review.is_anonymous ? null : review.display_name
+    if (error) {
+      console.error('Supabase reviews error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch reviews' },
+        { status: 500 }
+      )
+    }
+
+    // Get user info for non-anonymous reviews
+    const userIds = (reviews || [])
+      .filter(review => !review.is_anonymous)
+      .map(review => review.user_id)
+
+    let users = []
+    if (userIds.length > 0) {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id, stage, display_name')
+        .in('id', userIds)
+      
+      if (!userError) {
+        users = userData || []
       }
-    }))
+    }
+
+    // Format reviews for frontend
+    const formattedReviews = (reviews || []).map((review: any) => {
+      const user = users.find(u => u.id === review.user_id)
+      return {
+        id: review.id,
+        rating: review.rating,
+        tags: Array.isArray(review.tags) ? review.tags : JSON.parse(review.tags || '[]'),
+        body: review.body,
+        is_anonymous: Boolean(review.is_anonymous),
+        created_at: review.created_at,
+        updated_at: review.updated_at,
+        author: {
+          stage: user?.stage || 'Student',
+          display_name: review.is_anonymous ? null : user?.display_name
+        }
+      }
+    })
 
     // Calculate review stats
-    const totalReviews = reviews.length
+    const totalReviews = formattedReviews.length
     const averageRating = totalReviews > 0 
-      ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / totalReviews 
+      ? formattedReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / totalReviews 
       : 0
 
     return NextResponse.json({
@@ -117,9 +148,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if place exists
-    const place = db.prepare('SELECT id FROM places WHERE id = ?').get(place_id)
-    if (!place) {
+    // Check if place exists in Supabase
+    const { data: place, error: placeError } = await supabase
+      .from('places')
+      .select('id')
+      .eq('id', place_id)
+      .single()
+
+    if (placeError || !place) {
       return NextResponse.json(
         { success: false, error: 'Place not found' },
         { status: 404 }
@@ -127,20 +163,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already reviewed this place
-    const existingReview = db.prepare(`
-      SELECT id FROM reviews WHERE user_id = ? AND place_id = ?
-    `).get(user.id, place_id) as { id: number } | undefined
+    const { data: existingReview, error: existingError } = await supabase
+      .from('reviews')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('place_id', place_id)
+      .single()
 
-    const tagsJson = JSON.stringify(tags || [])
-    const now = new Date().toISOString()
+    const reviewData = {
+      user_id: user.id,
+      place_id: place_id,
+      rating: rating,
+      tags: tags || [],
+      body: review_body,
+      is_anonymous: is_anonymous || false,
+      updated_at: new Date().toISOString()
+    }
 
-    if (existingReview) {
+    if (existingReview && !existingError) {
       // Update existing review
-      db.prepare(`
-        UPDATE reviews 
-        SET rating = ?, tags = ?, body = ?, is_anonymous = ?, updated_at = ?
-        WHERE user_id = ? AND place_id = ?
-      `).run(rating, tagsJson, review_body, is_anonymous ? 1 : 0, now, user.id, place_id)
+      const { data, error } = await supabase
+        .from('reviews')
+        .update(reviewData)
+        .eq('id', existingReview.id)
+        .select()
+
+      if (error) {
+        console.error('Update review error:', error)
+        return NextResponse.json(
+          { success: false, error: 'Failed to update review' },
+          { status: 500 }
+        )
+      }
 
       return NextResponse.json({
         success: true,
@@ -149,15 +203,26 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Create new review
-      const result = db.prepare(`
-        INSERT INTO reviews (user_id, place_id, rating, tags, body, is_anonymous, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(user.id, place_id, rating, tagsJson, review_body, is_anonymous ? 1 : 0, now, now)
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert({
+          ...reviewData,
+          created_at: new Date().toISOString()
+        })
+        .select()
+
+      if (error) {
+        console.error('Create review error:', error)
+        return NextResponse.json(
+          { success: false, error: 'Failed to create review' },
+          { status: 500 }
+        )
+      }
 
       return NextResponse.json({
         success: true,
         message: 'Review posted successfully',
-        review_id: result.lastInsertRowid
+        review_id: data[0]?.id
       })
     }
   } catch (error) {
