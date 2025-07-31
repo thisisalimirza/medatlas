@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,13 +18,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user exists
-    const user = db.prepare(`
-      SELECT id, email, stage, display_name, is_paid, created_at
-      FROM users WHERE email = ?
-    `).get(email) as any
+    // Check if user exists in Supabase
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email, stage, display_name, is_paid, created_at')
+      .eq('email', email)
+      .single()
 
-    if (!user) {
+    // If no user found or error (user doesn't exist)
+    if (error || !user) {
       return NextResponse.json({
         success: true,
         userExists: false,

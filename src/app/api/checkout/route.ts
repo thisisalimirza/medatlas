@@ -8,12 +8,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, stage } = body
+    const { email } = body
 
     // Validation
-    if (!email || !stage) {
+    if (!email) {
       return NextResponse.json(
-        { success: false, error: 'Email and stage are required' },
+        { success: false, error: 'Email is required' },
         { status: 400 }
       )
     }
@@ -56,7 +56,6 @@ export async function POST(request: NextRequest) {
       cancel_url: cancelUrl,
       metadata: {
         email,
-        stage,
         product: 'medatlas-pro'
       },
       allow_promotion_codes: true,
