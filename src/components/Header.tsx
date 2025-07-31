@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import AuthModal from './AuthModal'
 import MainNavigation from './MainNavigation'
@@ -15,7 +15,24 @@ interface HeaderProps {
 export default function Header({ searchQuery = '', onSearchChange, isFiltersSidebarOpen, onToggleFiltersSidebar }: HeaderProps) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup')
-  const { user, logout, loading } = useAuth()
+  const { user, logout, loading, refreshUser } = useAuth()
+
+  // Recovery mechanism for stuck auth states
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+
+    // If we've been loading for more than 5 seconds, try to recover
+    if (loading) {
+      timeoutId = setTimeout(() => {
+        console.log('Header: Auth stuck in loading state, attempting recovery...')
+        refreshUser()
+      }, 5000)
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [loading, refreshUser])
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">

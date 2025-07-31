@@ -77,7 +77,7 @@ const navigationData: NavSection[] = [
   {
     label: "Community",
     items: [
-      { icon: "💬", label: "Live Chat", href: "https://t.me/medatlas", external: true },
+      { icon: "💬", label: "Live Chat", href: "https://t.me/+666ywZFkke5lMjQx", external: true },
       { icon: "🧑‍🤝‍🧑", label: "Study Partners", href: "/study-partners", requiresAuth: true },
       { icon: "📍", label: "Member Map", href: "/map", requiresAuth: true },
       { icon: "❓", label: "FAQ & Help", href: "/faq" }

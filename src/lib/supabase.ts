@@ -10,7 +10,13 @@ const createSupabaseClient = () => {
     // Return a dummy client for build time
     return createClient('https://dummy.supabase.co', 'dummy-key')
   }
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  })
 }
 
 export const supabase = createSupabaseClient()
