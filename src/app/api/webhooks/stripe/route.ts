@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
           }
 
           // Check if user already exists in Supabase
-          const { data: existingUser } = await supabase
+          const { data: existingUser } = await supabaseAdmin
             .from('user_profiles')
             .select('*')
             .eq('email', email)

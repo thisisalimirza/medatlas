@@ -7,8 +7,15 @@ import { User as SupabaseUser, Session } from '@supabase/supabase-js'
 interface UserProfile {
   id: string
   email: string
+  username: string
+  display_name: string
   stage: string
-  display_name?: string
+  bio: string
+  location_city: string
+  location_state: string
+  undergraduate_school: string
+  medical_school: string
+  graduation_year: number
   is_paid: boolean
   created_at: string
 }

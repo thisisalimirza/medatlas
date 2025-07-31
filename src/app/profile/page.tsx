@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
+import SchoolSuggestionForm from '@/components/SchoolSuggestionForm'
 
 interface UserProfile {
   id: string
@@ -30,6 +31,8 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState<Partial<UserProfile>>({})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showUndergraduateSuggestion, setShowUndergraduateSuggestion] = useState(false)
+  const [showMedicalSuggestion, setShowMedicalSuggestion] = useState(false)
 
   const medicalStages = [
     { value: 'premed', label: 'Pre-med Student', emoji: '📚' },
@@ -309,30 +312,70 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-semibold mb-3">Education</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Undergraduate School</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium">Undergraduate School</label>
+                      {editing && (
+                        <button
+                          type="button"
+                          onClick={() => setShowUndergraduateSuggestion(!showUndergraduateSuggestion)}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          {showUndergraduateSuggestion ? 'Hide' : 'Suggest School'}
+                        </button>
+                      )}
+                    </div>
                     {editing ? (
-                      <input
-                        type="text"
-                        value={formData.undergraduate_school || ''}
-                        onChange={(e) => handleInputChange('undergraduate_school', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                        placeholder="University name"
-                      />
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          value={formData.undergraduate_school || ''}
+                          onChange={(e) => handleInputChange('undergraduate_school', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                          placeholder="University name"
+                        />
+                        {showUndergraduateSuggestion && (
+                          <SchoolSuggestionForm
+                            schoolType="undergraduate"
+                            onSuccess={() => setShowUndergraduateSuggestion(false)}
+                            onCancel={() => setShowUndergraduateSuggestion(false)}
+                          />
+                        )}
+                      </div>
                     ) : (
                       <p className="text-gray-900">{profile.undergraduate_school || 'Not set'}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">Medical School</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium">Medical School</label>
+                      {editing && (
+                        <button
+                          type="button"
+                          onClick={() => setShowMedicalSuggestion(!showMedicalSuggestion)}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline"
+                        >
+                          {showMedicalSuggestion ? 'Hide' : 'Suggest School'}
+                        </button>
+                      )}
+                    </div>
                     {editing ? (
-                      <input
-                        type="text"
-                        value={formData.medical_school || ''}
-                        onChange={(e) => handleInputChange('medical_school', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                        placeholder="Medical school name"
-                      />
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          value={formData.medical_school || ''}
+                          onChange={(e) => handleInputChange('medical_school', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                          placeholder="Medical school name"
+                        />
+                        {showMedicalSuggestion && (
+                          <SchoolSuggestionForm
+                            schoolType="medical"
+                            onSuccess={() => setShowMedicalSuggestion(false)}
+                            onCancel={() => setShowMedicalSuggestion(false)}
+                          />
+                        )}
+                      </div>
                     ) : (
                       <p className="text-gray-900">{profile.medical_school || 'Not set'}</p>
                     )}
