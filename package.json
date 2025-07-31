@@ -1,0 +1,38 @@
+{
+  "name": "medatlas",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@stripe/react-stripe-js": "^3.8.1",
+    "@stripe/stripe-js": "^7.7.0",
+    "@supabase/supabase-js": "^2.53.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.2.0",
+    "dotenv": "^17.2.1",
+    "jose": "^6.0.12",
+    "next": "^15.4.5",
+    "next-auth": "^4.24.11",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "stripe": "^18.4.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.32.0",
+    "eslint-config-next": "^15.4.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3"
+  }
+}

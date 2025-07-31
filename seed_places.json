@@ -1,0 +1,295 @@
+[
+  {
+    "slug": "nyu-grossman",
+    "name": "NYU Grossman School of Medicine",
+    "type": "school",
+    "institution": "New York University",
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "lat": 40.73,
+    "lng": -73.99,
+    "photo_url": "https://example.com/nyu.jpg",
+    "tags": [
+      "urban",
+      "research-heavy"
+    ],
+    "metrics": {
+      "tuition": 0,
+      "col_index": 3800,
+      "research_output": 9.5,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 9,
+      "community_score": 7,
+      "lifestyle": 8,
+      "burnout": 4,
+      "match_strength": 9
+    }
+  },
+  {
+    "slug": "harvard-med",
+    "name": "Harvard Medical School",
+    "type": "school",
+    "institution": "Harvard University",
+    "city": "Boston",
+    "state": "MA",
+    "country": "USA",
+    "lat": 42.36,
+    "lng": -71.1,
+    "photo_url": "https://example.com/harvard.jpg",
+    "tags": [
+      "urban",
+      "prestigious"
+    ],
+    "metrics": {
+      "tuition": 67000,
+      "col_index": 4200,
+      "research_output": 10,
+      "img_friendly": false
+    },
+    "scores": {
+      "quality_of_training": 10,
+      "community_score": 6,
+      "lifestyle": 6,
+      "burnout": 6,
+      "match_strength": 10
+    }
+  },
+  {
+    "slug": "case-western",
+    "name": "Case Western Reserve SOM",
+    "type": "school",
+    "institution": "Case Western Reserve",
+    "city": "Cleveland",
+    "state": "OH",
+    "country": "USA",
+    "lat": 41.5,
+    "lng": -81.61,
+    "photo_url": "https://example.com/cwru.jpg",
+    "tags": [
+      "urban",
+      "research-heavy",
+      "community-oriented"
+    ],
+    "metrics": {
+      "tuition": 64000,
+      "col_index": 2900,
+      "research_output": 7.8,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 8,
+      "community_score": 8,
+      "lifestyle": 7,
+      "burnout": 5,
+      "match_strength": 8
+    }
+  },
+  {
+    "slug": "ucla-dgsom",
+    "name": "UCLA David Geffen School of Medicine",
+    "type": "school",
+    "institution": "UCLA",
+    "city": "Los Angeles",
+    "state": "CA",
+    "country": "USA",
+    "lat": 34.07,
+    "lng": -118.44,
+    "photo_url": "https://example.com/ucla.jpg",
+    "tags": [
+      "urban",
+      "research-heavy",
+      "west-coast"
+    ],
+    "metrics": {
+      "tuition": 55000,
+      "col_index": 4500,
+      "research_output": 9.2,
+      "img_friendly": false
+    },
+    "scores": {
+      "quality_of_training": 9,
+      "community_score": 7,
+      "lifestyle": 7,
+      "burnout": 5,
+      "match_strength": 9
+    }
+  },
+  {
+    "slug": "ucsf",
+    "name": "University of California San Francisco",
+    "type": "school",
+    "institution": "UCSF",
+    "city": "San Francisco",
+    "state": "CA",
+    "country": "USA",
+    "lat": 37.76,
+    "lng": -122.45,
+    "photo_url": "https://example.com/ucsf.jpg",
+    "tags": [
+      "urban",
+      "research-heavy"
+    ],
+    "metrics": {
+      "tuition": 48000,
+      "col_index": 4600,
+      "research_output": 9.7,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 10,
+      "community_score": 7,
+      "lifestyle": 6,
+      "burnout": 7,
+      "match_strength": 10
+    }
+  },
+  {
+    "slug": "baylor-com",
+    "name": "Baylor College of Medicine",
+    "type": "school",
+    "institution": "Baylor",
+    "city": "Houston",
+    "state": "TX",
+    "country": "USA",
+    "lat": 29.71,
+    "lng": -95.4,
+    "photo_url": "https://example.com/baylor.jpg",
+    "tags": [
+      "urban",
+      "affordable"
+    ],
+    "metrics": {
+      "tuition": 27000,
+      "col_index": 2000,
+      "research_output": 7.5,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 8,
+      "community_score": 8,
+      "lifestyle": 7,
+      "burnout": 5,
+      "match_strength": 8
+    }
+  },
+  {
+    "slug": "lecom",
+    "name": "LECOM Bradenton",
+    "type": "school",
+    "institution": "LECOM",
+    "city": "Bradenton",
+    "state": "FL",
+    "country": "USA",
+    "lat": 27.49,
+    "lng": -82.57,
+    "photo_url": "https://example.com/lecom.jpg",
+    "tags": [
+      "suburban",
+      "primary-care"
+    ],
+    "metrics": {
+      "tuition": 33000,
+      "col_index": 1800,
+      "research_output": 3.2,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 6,
+      "community_score": 8,
+      "lifestyle": 8,
+      "burnout": 3,
+      "match_strength": 6
+    }
+  },
+  {
+    "slug": "columbia-vps",
+    "name": "Columbia Vagelos College of P&S",
+    "type": "school",
+    "institution": "Columbia University",
+    "city": "New York",
+    "state": "NY",
+    "country": "USA",
+    "lat": 40.84,
+    "lng": -73.94,
+    "photo_url": "https://example.com/columbia.jpg",
+    "tags": [
+      "urban",
+      "ivy-league"
+    ],
+    "metrics": {
+      "tuition": 69000,
+      "col_index": 3900,
+      "research_output": 9.3,
+      "img_friendly": false
+    },
+    "scores": {
+      "quality_of_training": 9,
+      "community_score": 6,
+      "lifestyle": 6,
+      "burnout": 7,
+      "match_strength": 9
+    }
+  },
+  {
+    "slug": "unc-chapel-hill",
+    "name": "UNC School of Medicine",
+    "type": "school",
+    "institution": "UNC",
+    "city": "Chapel Hill",
+    "state": "NC",
+    "country": "USA",
+    "lat": 35.91,
+    "lng": -79.05,
+    "photo_url": "https://example.com/unc.jpg",
+    "tags": [
+      "public",
+      "southern"
+    ],
+    "metrics": {
+      "tuition": 25000,
+      "col_index": 2200,
+      "research_output": 7.0,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 8,
+      "community_score": 9,
+      "lifestyle": 8,
+      "burnout": 3,
+      "match_strength": 7
+    }
+  },
+  {
+    "slug": "rush",
+    "name": "Rush Medical College",
+    "type": "school",
+    "institution": "Rush University",
+    "city": "Chicago",
+    "state": "IL",
+    "country": "USA",
+    "lat": 41.87,
+    "lng": -87.67,
+    "photo_url": "https://example.com/rush.jpg",
+    "tags": [
+      "urban",
+      "private",
+      "community-oriented"
+    ],
+    "metrics": {
+      "tuition": 56000,
+      "col_index": 3500,
+      "research_output": 6.5,
+      "img_friendly": true
+    },
+    "scores": {
+      "quality_of_training": 7,
+      "community_score": 8,
+      "lifestyle": 7,
+      "burnout": 4,
+      "match_strength": 7
+    }
+  }
+]
