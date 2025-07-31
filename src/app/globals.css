@@ -149,4 +149,44 @@
       background-position: 200% 0;
     }
   }
+
+  /* Mobile-specific utilities */
+  @media (max-width: 768px) {
+    .btn-red, .btn-outline {
+      padding: 0.625rem 1.25rem;
+      font-size: 0.875rem;
+    }
+    
+    .modal-content {
+      margin: 0.5rem;
+      max-height: 95vh;
+    }
+    
+    .card {
+      border-radius: 0.5rem;
+    }
+    
+    /* Ensure text is readable on mobile */
+    .text-mobile-adjust {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    
+    /* Mobile-friendly spacing */
+    .mobile-padding {
+      padding: 1rem;
+    }
+    
+    .mobile-spacing {
+      margin-bottom: 1rem;
+    }
+  }
+
+  /* Touch targets for mobile */
+  @media (max-width: 768px) {
+    button, a[role="button"], .clickable {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
 }

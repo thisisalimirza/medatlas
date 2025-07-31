@@ -14,8 +14,19 @@ function PaymentProcessor() {
   const [userEmail, setUserEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [stage, setStage] = useState('ms1')
   const [passwordError, setPasswordError] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
+
+  const medicalStages = [
+    { value: 'premed', label: 'Pre-med Student', emoji: '📚' },
+    { value: 'ms1', label: 'MS1 (First Year)', emoji: '👨‍⚕️' },
+    { value: 'ms2', label: 'MS2 (Second Year)', emoji: '👩‍⚕️' },
+    { value: 'ms3', label: 'MS3 (Third Year)', emoji: '🏥' },
+    { value: 'ms4', label: 'MS4 (Fourth Year)', emoji: '🎓' },
+    { value: 'resident', label: 'Resident', emoji: '👨‍⚕️' },
+    { value: 'attending', label: 'Attending', emoji: '🩺' },
+  ]
 
   useEffect(() => {
     const processPayment = async () => {
@@ -114,13 +125,14 @@ function PaymentProcessor() {
     }
 
     try {
-      // Update user's password
+      // Update user's password and stage
       const response = await fetch('/api/auth/set-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           email: userEmail,
-          password: password 
+          password: password,
+          stage: stage
         })
       })
 
@@ -174,6 +186,22 @@ function PaymentProcessor() {
                       disabled
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                     />
+                  </div>
+
+                  <div className="text-left">
+                    <label className="block text-sm font-medium mb-1">What's your stage?</label>
+                    <select
+                      value={stage}
+                      onChange={(e) => setStage(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                      required
+                    >
+                      {medicalStages.map(stageOption => (
+                        <option key={stageOption.value} value={stageOption.value}>
+                          {stageOption.emoji} {stageOption.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="text-left">

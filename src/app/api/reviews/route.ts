@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       .filter(review => !review.is_anonymous)
       .map(review => review.user_id)
 
-    let users = []
+    let users: { id: string; stage: string; display_name: string }[] = []
     if (userIds.length > 0) {
       const { data: userData, error: userError } = await supabase
         .from('users')

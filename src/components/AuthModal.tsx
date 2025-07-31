@@ -115,8 +115,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: formData.email,
-          stage: formData.stage
+          email: formData.email
         })
       })
 
@@ -204,23 +203,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
           {/* Form - Step-based */}
           {step === 'email' && (
             <form onSubmit={handleEmailSubmit} className="space-y-4">
-              {/* Training Stage - only for new users */}
-              <div>
-                <label className="block text-sm font-medium mb-1">What's your stage?</label>
-                <select
-                  value={formData.stage}
-                  onChange={(e) => handleInputChange('stage', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                  required
-                >
-                  {medicalStages.map(stage => (
-                    <option key={stage.value} value={stage.value}>
-                      {stage.emoji} {stage.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium mb-1">Email address</label>
@@ -327,22 +309,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                     disabled
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">Medical Stage</label>
-                  <select
-                    value={formData.stage}
-                    onChange={(e) => handleInputChange('stage', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                    required
-                  >
-                    {medicalStages.map(stage => (
-                      <option key={stage.value} value={stage.value}>
-                        {stage.emoji} {stage.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
 
                 {/* Pricing Info */}

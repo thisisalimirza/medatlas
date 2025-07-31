@@ -17,7 +17,7 @@ export default function HomePage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isComparisonOpen, setIsComparisonOpen] = useState(false)
-  const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(true)
+  const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(false) // Default closed on mobile
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
 
   useEffect(() => {
@@ -165,16 +165,16 @@ export default function HomePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Payment Success Notification */}
       {showPaymentSuccess && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg border border-green-200 p-4 max-w-md">
-          <div className="flex items-center space-x-3">
-            <div className="text-2xl">🎉</div>
-            <div>
-              <div className="font-semibold text-green-800">Welcome to MedAtlas Pro!</div>
-              <div className="text-sm text-green-600">Your payment was successful. You now have full access!</div>
+        <div className="fixed top-16 sm:top-20 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg border border-green-200 p-3 sm:p-4 max-w-sm sm:max-w-md mx-4">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="text-xl sm:text-2xl">🎉</div>
+            <div className="flex-1">
+              <div className="font-semibold text-green-800 text-sm sm:text-base">Welcome to MedAtlas Pro!</div>
+              <div className="text-xs sm:text-sm text-green-600">Your payment was successful. You now have full access!</div>
             </div>
             <button 
               onClick={() => setShowPaymentSuccess(false)}
-              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-full transition-all duration-200 group"
+              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-full transition-all duration-200 group flex-shrink-0"
             >
               <span className="group-hover:scale-110 transition-transform inline-block">×</span>
             </button>
@@ -189,47 +189,75 @@ export default function HomePage() {
         onToggleFiltersSidebar={() => setIsFiltersSidebarOpen(!isFiltersSidebarOpen)}
       />
       
-      <div className="flex">
+      <div className="flex relative">
+        {/* Mobile Sidebar Overlay */}
+        {isFiltersSidebarOpen && (
+          <div 
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+            onClick={() => setIsFiltersSidebarOpen(false)}
+          />
+        )}
+        
         {/* Sidebar - Conditionally shown */}
         {isFiltersSidebarOpen && (
-          <FilterSidebar 
-            onFiltersChange={setFilters}
-            currentFilters={filters}
-          />
+          <div className="fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
+            <FilterSidebar 
+              onFiltersChange={setFilters}
+              currentFilters={filters}
+            />
+          </div>
         )}
 
         {/* Main Content */}
-        <div className="flex-1">
-        {/* Page Header */}
-        <div className="bg-white border-b border-gray-200 p-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center space-x-3">
-                  <span>🏥</span>
-                  <span>Medical Schools & Programs</span>
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Find your path to becoming a physician • Real insights from current students & residents
-                </p>
-              </div>
-              <div className="hidden md:flex items-center space-x-6">
-                <div className="text-center">
-                  <div className="text-lg font-bold text-brand-red">2,847+</div>
-                  <div className="text-xs text-gray-500">Med Students</div>
+        <div className="flex-1 min-w-0">
+          {/* Page Header */}
+          <div className="bg-white border-b border-gray-200 p-3 sm:p-4 md:p-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div className="mb-4 md:mb-0">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center space-x-2 sm:space-x-3">
+                    <span>🏥</span>
+                    <span>Medical Schools & Programs</span>
+                  </h1>
+                  <p className="text-gray-600 mt-1 text-sm sm:text-base">
+                    Find your path to becoming a physician • Real insights from current students & residents
+                  </p>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-brand-red">450+</div>
-                  <div className="text-xs text-gray-500">Programs Tracked</div>
+                
+                {/* Stats - Show on mobile as horizontal row */}
+                <div className="flex md:hidden items-center justify-between space-x-4 mb-2">
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-brand-red">2,847+</div>
+                    <div className="text-xs text-gray-500">Students</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-brand-red">450+</div>
+                    <div className="text-xs text-gray-500">Programs</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-sm font-bold text-brand-red">95%</div>
+                    <div className="text-xs text-gray-500">Match Rate</div>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-brand-red">95%</div>
-                  <div className="text-xs text-gray-500">Match Success</div>
+                
+                {/* Stats - Desktop version */}
+                <div className="hidden md:flex items-center space-x-6">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-brand-red">2,847+</div>
+                    <div className="text-xs text-gray-500">Med Students</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-brand-red">450+</div>
+                    <div className="text-xs text-gray-500">Programs Tracked</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-brand-red">95%</div>
+                    <div className="text-xs text-gray-500">Match Success</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
         {/* Filter Summary */}
         <FilterSummary
@@ -239,64 +267,66 @@ export default function HomePage() {
           resultsCount={filteredPlaces.length}
         />
 
-        {/* Content Area */}
-        <div className="p-6">
-          <div className="max-w-6xl mx-auto">
-            {/* Results Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <p className="text-gray-600 font-medium">
-                  {loading ? 'Loading programs...' : `${filteredPlaces.length} medical programs`}
-                </p>
-                {!loading && filteredPlaces.length > 0 && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <span>•</span>
-                    <span>Avg MCAT: {Math.round(filteredPlaces.reduce((acc, p) => acc + (p.mcat_avg || 0), 0) / filteredPlaces.length)}</span>
-                    <span>•</span>
-                    <span>Avg GPA: {(filteredPlaces.reduce((acc, p) => acc + (p.gpa_avg || 0), 0) / filteredPlaces.length).toFixed(1)}</span>
-                  </div>
-                )}
+          {/* Content Area */}
+          <div className="p-3 sm:p-4 md:p-6">
+            <div className="max-w-6xl mx-auto">
+              {/* Results Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                  <p className="text-gray-600 font-medium text-sm sm:text-base">
+                    {loading ? 'Loading programs...' : `${filteredPlaces.length} medical programs`}
+                  </p>
+                  {!loading && filteredPlaces.length > 0 && (
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
+                      <span className="hidden sm:inline">•</span>
+                      <span>Avg MCAT: {Math.round(filteredPlaces.reduce((acc, p) => acc + (p.mcat_avg || 0), 0) / filteredPlaces.length)}</span>
+                      <span>•</span>
+                      <span>Avg GPA: {(filteredPlaces.reduce((acc, p) => acc + (p.gpa_avg || 0), 0) / filteredPlaces.length).toFixed(1)}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between sm:justify-end space-x-2">
+                  <button 
+                    onClick={() => setIsComparisonOpen(true)}
+                    className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold bg-red-600 text-white rounded-full hover:bg-red-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 shadow-md border border-red-700"
+                  >
+                    <span className="group-hover:scale-110 transition-transform">📊</span>
+                    <span>Compare</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      // Sort by rank and scroll to top
+                      const sortedPlaces = [...filteredPlaces].sort((a, b) => (a.rank_overall || 1) - (b.rank_overall || 1))
+                      setPlaces([...places.filter(p => !filteredPlaces.includes(p)), ...sortedPlaces])
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  >
+                    <span className="flex items-center space-x-1">
+                      <span className="group-hover:scale-110 transition-transform">🏆</span>
+                      <span className="hidden xs:inline">By Rank</span>
+                      <span className="xs:hidden">Rank</span>
+                    </span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      alert('🗺️ Map view coming soon! This will show all medical schools on an interactive map.')
+                    }}
+                    className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  >
+                    <span className="flex items-center space-x-1">
+                      <span className="group-hover:scale-110 transition-transform">📍</span>
+                      <span className="hidden xs:inline">Map View</span>
+                      <span className="xs:hidden">Map</span>
+                    </span>
+                  </button>
+                </div>
               </div>
-              
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => setIsComparisonOpen(true)}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-semibold bg-red-600 text-white rounded-full hover:bg-red-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 shadow-md border border-red-700"
-                >
-                  <span className="group-hover:scale-110 transition-transform">📊</span>
-                  <span>Compare</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    // Sort by rank and scroll to top
-                    const sortedPlaces = [...filteredPlaces].sort((a, b) => (a.rank_overall || 1) - (b.rank_overall || 1))
-                    setPlaces([...places.filter(p => !filteredPlaces.includes(p)), ...sortedPlaces])
-                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                  }}
-                  className="px-3 py-2 text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                >
-                  <span className="flex items-center space-x-1">
-                    <span className="group-hover:scale-110 transition-transform">🏆</span>
-                    <span>By Rank</span>
-                  </span>
-                </button>
-                <button 
-                  onClick={() => {
-                    alert('🗺️ Map view coming soon! This will show all medical schools on an interactive map.')
-                  }}
-                  className="px-3 py-2 text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                >
-                  <span className="flex items-center space-x-1">
-                    <span className="group-hover:scale-110 transition-transform">📍</span>
-                    <span>Map View</span>
-                  </span>
-                </button>
-              </div>
-            </div>
 
-            {/* Places Grid */}
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Places Grid */}
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="card animate-pulse">
                     <div className="h-48 bg-gray-200"></div>
@@ -308,8 +338,8 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {filteredPlaces.map((place) => (
                   <PlaceCard
                     key={place.id}

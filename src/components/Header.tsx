@@ -19,12 +19,26 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left side - Navigation and Filters */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <MainNavigation />
             <div className="hidden md:block h-6 w-px bg-gray-300"></div>
+            
+            {/* Mobile filter button */}
+            <button 
+              onClick={onToggleFiltersSidebar}
+              className={`md:hidden p-2 transition-colors rounded-lg ${
+                isFiltersSidebarOpen 
+                  ? 'bg-brand-red text-white' 
+                  : 'text-brand-red hover:bg-red-50'
+              }`}
+            >
+              <span className="text-lg">🔧</span>
+            </button>
+            
+            {/* Desktop filter button */}
             <button 
               onClick={onToggleFiltersSidebar}
               className={`hidden md:flex border items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
@@ -38,40 +52,40 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
             </button>
           </div>
 
-          {/* Search Bar (Center) */}
-          <div className="flex-1 max-w-lg mx-8">
+          {/* Search Bar (Center on desktop, full width on mobile) */}
+          <div className="flex-1 max-w-lg mx-2 sm:mx-4 md:mx-8">
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
-                placeholder="Search medical schools or programs..."
-                className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-full focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-sm"
+                placeholder="Search schools..."
+                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 border border-gray-300 rounded-full focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-sm placeholder:text-xs sm:placeholder:text-sm"
               />
-              <div className="absolute right-3 top-3 text-gray-400">
+              <div className="absolute right-2 sm:right-3 top-2 sm:top-3 text-gray-400 text-sm">
                 🔍
               </div>
             </div>
           </div>
 
           {/* Right side - User Menu */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-3">
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
             ) : user ? (
-              <div className="flex items-center space-x-2">
-                {/* Simple notification indicator */}
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                {/* Simple notification indicator - hidden on very small screens */}
                 <button 
                   onClick={() => alert('🔔 Notifications coming soon! Get alerts for new reviews, match updates, and application deadlines.')}
-                  className="relative p-2 text-gray-400 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200 group"
+                  className="hidden xs:block relative p-2 text-gray-400 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200 group"
                 >
-                  <span className="group-hover:scale-110 transition-transform inline-block">🔔</span>
+                  <span className="group-hover:scale-110 transition-transform inline-block text-lg">🔔</span>
                 </button>
 
                 {/* Simplified User Profile */}
                 <div className="relative group">
-                  <button className="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 bg-brand-red rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  <button className="flex items-center space-x-1 sm:space-x-2 p-1 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 bg-brand-red rounded-full flex items-center justify-center text-white text-sm font-medium">
                       {user.display_name ? user.display_name[0].toUpperCase() : user.email[0].toUpperCase()}
                     </div>
                     <div className="hidden sm:block text-left">
@@ -79,7 +93,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                         {user.display_name || user.email.split('@')[0]}
                       </div>
                     </div>
-                    <div className="text-gray-400">
+                    <div className="text-gray-400 hidden sm:block">
                       ⌄
                     </div>
                   </button>
@@ -95,6 +109,10 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                       </div>
                     </div>
                     <div className="py-1">
+                      <a href="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
+                        <span className="mr-3 group-hover:scale-110 transition-transform">👤</span>
+                        My Profile
+                      </a>
                       <a href="/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
                         <span className="mr-3 group-hover:scale-110 transition-transform">📊</span>
                         Dashboard
@@ -128,25 +146,38 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 sm:space-x-2">
                 <button 
                   onClick={() => {
                     setAuthModalMode('login')
                     setIsAuthModalOpen(true)
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200 group"
+                  className="hidden sm:flex px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200 group"
                 >
                   <span className="group-hover:scale-110 transition-transform inline-block mr-1">🔑</span>
-                  Log in
+                  <span className="hidden sm:inline">Log in</span>
                 </button>
+                
+                {/* Mobile login button */}
+                <button 
+                  onClick={() => {
+                    setAuthModalMode('login')
+                    setIsAuthModalOpen(true)
+                  }}
+                  className="sm:hidden p-2 text-gray-700 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200"
+                >
+                  <span className="text-lg">🔑</span>
+                </button>
+                
                 <button 
                   onClick={() => {
                     setAuthModalMode('signup')
                     setIsAuthModalOpen(true)
                   }}
-                  className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-full hover:bg-red-600 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
+                  className="px-3 sm:px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-full hover:bg-red-600 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
                 >
-                  Join MedAtlas +
+                  <span className="sm:hidden">Join</span>
+                  <span className="hidden sm:inline">Join MedAtlas +</span>
                 </button>
               </div>
             )}
