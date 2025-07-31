@@ -187,7 +187,7 @@ export default function MainNavigation() {
 
       {/* Dropdown Menu - Clean nomad style */}
       {isOpen && (
-        <div className="absolute top-14 left-0 z-50 w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden max-h-[85vh] overflow-y-auto">
+        <div className="absolute top-14 left-0 z-50 w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden max-h-[85vh] overflow-y-auto overscroll-contain">
           {/* Simple Header */}
           <div className="p-4 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center justify-between">

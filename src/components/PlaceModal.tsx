@@ -946,7 +946,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[60vh]">
+        <div className="overflow-y-auto max-h-[60vh] overscroll-contain">
           {renderTabContent()}
         </div>
       </div>

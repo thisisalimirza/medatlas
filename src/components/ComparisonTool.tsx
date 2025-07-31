@@ -164,7 +164,7 @@ export default function ComparisonTool({ isOpen, onClose, initialPlaces = [] }: 
 
                 {/* Search Results */}
                 {searchResults.length > 0 && (
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto overscroll-contain">
                     {searchResults.map((place) => (
                       <button
                         key={place.id}
