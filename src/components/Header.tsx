@@ -26,7 +26,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
             <MainNavigation />
             <div className="hidden md:block h-6 w-px bg-gray-300"></div>
             
-            {/* Mobile filter button */}
+            {/* Filter button - mobile version */}
             <button 
               onClick={onToggleFiltersSidebar}
               className={`md:hidden p-2 transition-colors rounded-lg ${
@@ -38,7 +38,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
               <span className="text-lg">🔧</span>
             </button>
             
-            {/* Desktop filter button */}
+            {/* Filter button - desktop version */}
             <button 
               onClick={onToggleFiltersSidebar}
               className={`hidden md:flex border items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
@@ -48,7 +48,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
               }`}
             >
               <span>🔧</span>
-              <span>Filters</span>
+              <span>{isFiltersSidebarOpen ? 'Hide Filters' : 'Show Filters'}</span>
             </button>
           </div>
 

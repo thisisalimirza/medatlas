@@ -124,44 +124,8 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="max-w-6xl mx-auto">
-        {/* Active Filters - More prominent */}
-        {activeFilters.length > 0 && (
-          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-red-600">🔍</span>
-                <h3 className="text-sm font-semibold text-red-800">
-                  Active Filters ({activeFilters.length})
-                </h3>
-              </div>
-              <button
-                onClick={onClearFilters}
-                className="text-xs text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-1.5 rounded-full font-medium transition-all duration-200"
-              >
-                Clear All
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {activeFilters.map(([key, value]) => (
-                <span
-                  key={key}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-red-600 text-white shadow-md border border-red-700"
-                >
-                  {getFilterLabel(key, value)}
-                  <button
-                    onClick={() => onFilterChange(key, null)}
-                    className="ml-2 text-white hover:text-gray-200 hover:bg-red-600 rounded-full w-5 h-5 flex items-center justify-center text-sm transition-all duration-200"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Smart Suggestions - Always show for easy access */}
-        <div className={activeFilters.length > 0 ? 'mt-4' : ''}>
+        <div>
           <h3 className="text-sm font-medium text-gray-700 mb-3">
             🤖 Smart Filter Suggestions
           </h3>
@@ -192,17 +156,27 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
               <>
                 <span className="font-medium text-gray-900">{resultsCount}</span> medical school{resultsCount !== 1 ? 's' : ''} found
                 {activeFilters.length > 0 && (
-                  <span className="text-gray-500"> with {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''}</span>
+                  <span className="text-gray-500"> with {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''} applied</span>
                 )}
               </>
             )}
           </div>
           
-          {user && user.is_paid && resultsCount > 0 && (
-            <div className="text-xs text-gray-500">
-              💡 Add schools to favorites to track applications
-            </div>
-          )}
+          <div className="flex items-center space-x-4">
+            {activeFilters.length > 0 && (
+              <button
+                onClick={onClearFilters}
+                className="text-xs text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-1.5 rounded-full font-medium transition-all duration-200"
+              >
+                Clear All Filters
+              </button>
+            )}
+            {user && user.is_paid && resultsCount > 0 && (
+              <div className="text-xs text-gray-500">
+                💡 Add schools to favorites to track applications
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ export default function HomePage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isComparisonOpen, setIsComparisonOpen] = useState(false)
-  const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(false) // Default closed on mobile
+  const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(true) // Default open
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
 
   useEffect(() => {
@@ -198,15 +198,13 @@ export default function HomePage() {
           />
         )}
         
-        {/* Sidebar - Conditionally shown */}
-        {isFiltersSidebarOpen && (
-          <div className="fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
-            <FilterSidebar 
-              onFiltersChange={setFilters}
-              currentFilters={filters}
-            />
-          </div>
-        )}
+        {/* Sidebar - Always shown on desktop, conditionally on mobile */}
+        <div className={`${isFiltersSidebarOpen ? 'block' : 'hidden md:block'} fixed md:relative inset-y-0 left-0 z-40 md:z-auto`}>
+          <FilterSidebar 
+            onFiltersChange={setFilters}
+            currentFilters={filters}
+          />
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
