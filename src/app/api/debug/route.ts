@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Test Supabase connection
-    let supabaseTest = { connected: false, error: null, placesCount: 0 }
+    let supabaseTest = { connected: false, error: null as string | null, placesCount: 0 }
     
     try {
       const supabase = createServerClient()
