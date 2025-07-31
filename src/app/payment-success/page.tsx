@@ -8,7 +8,7 @@ import Header from '@/components/Header'
 function PaymentProcessor() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { refreshUser } = useAuth()
+  const { refreshUser, login } = useAuth()
   const [status, setStatus] = useState<'loading' | 'success' | 'password-setup' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const [userEmail, setUserEmail] = useState('')
@@ -139,11 +139,20 @@ function PaymentProcessor() {
       const data = await response.json()
 
       if (data.success) {
-        setStatus('success')
-        // Redirect to home after a brief success message
-        setTimeout(() => {
-          router.push('/')
-        }, 3000)
+        // Now sign the user in with their new password
+        const loginResult = await login(userEmail, password)
+        
+        if (loginResult.success) {
+          setStatus('success')
+          // Refresh user data to ensure auth context is updated
+          await refreshUser()
+          // Redirect to home after a brief success message
+          setTimeout(() => {
+            router.push('/?payment=success')
+          }, 2000)
+        } else {
+          setPasswordError('Account created but login failed. Please try logging in manually.')
+        }
       } else {
         setPasswordError(data.error || 'Failed to set password')
       }

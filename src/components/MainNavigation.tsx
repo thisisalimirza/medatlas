@@ -32,12 +32,12 @@ const navigationData: NavSection[] = [
   {
     label: "Pre-Med Tools",
     items: [
-      { icon: "📚", label: "MCAT Prep Center", href: "/mcat-prep", requiresAuth: true },
-      { icon: "📝", label: "Personal Statement", href: "/personal-statement", requiresAuth: true, requiresPaid: true },
-      { icon: "📋", label: "Activity Tracker", href: "/activities", requiresAuth: true },
-      { icon: "🎯", label: "School List Builder", href: "/school-list", requiresAuth: true, requiresPaid: true },
-      { icon: "📅", label: "Application Timeline", href: "/timeline", requiresAuth: true, requiresPaid: true },
-      { icon: "💰", label: "Cost Calculator", href: "/cost-calculator", requiresAuth: true }
+      { icon: "🧮", label: "MCAT Calculator", href: "/tools/mcat-calculator" },
+      { icon: "📈", label: "GPA Calculator", href: "/tools/gpa-calculator" },
+      { icon: "✅", label: "Prerequisites Checker", href: "/tools/prerequisites-checker" },
+      { icon: "📅", label: "Application Timeline", href: "/tools/application-timeline" },
+      { icon: "💰", label: "Cost Calculator", href: "/tools/cost-calculator" },
+      { icon: "⚖️", label: "School Comparison", href: "/tools/school-comparison" }
     ]
   },
   {

@@ -19,6 +19,7 @@ export default function HomePage() {
   const [isComparisonOpen, setIsComparisonOpen] = useState(false)
   const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(true) // Default open
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
+  const [isFiltering, setIsFiltering] = useState(false)
 
   useEffect(() => {
     fetchPlaces()
@@ -65,6 +66,13 @@ export default function HomePage() {
     setSelectedPlace(null)
     // Reset URL
     window.history.pushState({}, '', '/')
+  }
+
+  const handleFiltersChange = (newFilters: any) => {
+    setIsFiltering(true)
+    setFilters(newFilters)
+    // Reset filtering state after a short delay to show skeleton
+    setTimeout(() => setIsFiltering(false), 300)
   }
 
   const filteredPlaces = places.filter(place => {
@@ -198,13 +206,15 @@ export default function HomePage() {
           />
         )}
         
-        {/* Sidebar - Always shown on desktop, conditionally on mobile */}
-        <div className={`${isFiltersSidebarOpen ? 'block' : 'hidden md:block'} fixed md:relative inset-y-0 left-0 z-40 md:z-auto`}>
-          <FilterSidebar 
-            onFiltersChange={setFilters}
-            currentFilters={filters}
-          />
-        </div>
+        {/* Sidebar - Conditionally shown */}
+        {isFiltersSidebarOpen && (
+          <div className="fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
+            <FilterSidebar 
+              onFiltersChange={handleFiltersChange}
+              currentFilters={filters}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
@@ -260,8 +270,8 @@ export default function HomePage() {
         {/* Filter Summary */}
         <FilterSummary
           filters={filters}
-          onFilterChange={(key, value) => setFilters({...filters, [key]: value})}
-          onClearFilters={() => setFilters({})}
+          onFilterChange={(key, value) => handleFiltersChange({...filters, [key]: value})}
+          onClearFilters={() => handleFiltersChange({})}
           resultsCount={filteredPlaces.length}
         />
 
@@ -323,15 +333,19 @@ export default function HomePage() {
               </div>
 
               {/* Places Grid */}
-              {loading ? (
+              {loading || isFiltering ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="card animate-pulse">
-                    <div className="h-48 bg-gray-200"></div>
+                    <div className="h-48 bg-gray-200 rounded-t-lg"></div>
                     <div className="p-4">
                       <div className="h-4 bg-gray-200 rounded mb-2"></div>
                       <div className="h-3 bg-gray-200 rounded mb-4 w-3/4"></div>
                       <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="h-3 bg-gray-200 rounded w-16"></div>
+                        <div className="h-3 bg-gray-200 rounded w-12"></div>
+                      </div>
                     </div>
                   </div>
                 ))}

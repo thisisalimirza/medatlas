@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authenticateUser, createToken } from '@/lib/auth'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,37 +19,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Authenticate user
-    const result = await authenticateUser(email, password)
+    // Authenticate user with Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
 
-    if (!result.success || !result.user) {
+    if (error || !data.user) {
       return NextResponse.json(
-        { success: false, error: result.error },
+        { success: false, error: error?.message || 'Authentication failed' },
         { status: 401 }
       )
     }
 
-    // Create JWT token
-    const token = await createToken(result.user)
+    // Get user profile
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single()
 
-    // Set cookie
-    const cookieStore = await cookies()
-    cookieStore.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 // 30 days
-    })
+    if (profileError || !profile) {
+      return NextResponse.json(
+        { success: false, error: 'User profile not found' },
+        { status: 404 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: result.user.id,
-        email: result.user.email,
-        stage: result.user.stage,
-        display_name: result.user.display_name,
-        is_paid: result.user.is_paid
-      }
+        id: profile.id,
+        email: profile.email,
+        stage: profile.stage,
+        display_name: profile.display_name,
+        is_paid: profile.is_paid
+      },
+      session: data.session
     })
   } catch (error) {
     console.error('Login error:', error)
