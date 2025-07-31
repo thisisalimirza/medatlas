@@ -1,41 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
-
-// Helper function to get current user from Supabase
-async function getCurrentUserFromSupabase() {
-  try {
-    const cookieStore = await cookies()
-    const session = cookieStore.get('sb-access-token')?.value
-    
-    if (!session) return null
-
-    const { data: { user }, error } = await supabase.auth.getUser(session)
-    if (error || !user) return null
-
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !profile) return null
-    return profile
-  } catch (error) {
-    console.error('Get current user error:', error)
-    return null
-  }
-}
+import { supabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
 
 // GET /api/favorites - Get user's favorite places
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromSupabase()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
@@ -52,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get favorites with place details from Supabase
-    const { data: favorites, error } = await supabase
+    const { data: favorites, error } = await supabaseAdmin
       .from('favorites')
       .select(`
         id,
@@ -109,7 +78,7 @@ export async function GET(request: NextRequest) {
 // POST /api/favorites - Add/update favorite
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromSupabase()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
@@ -136,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if place exists in Supabase
-    const { data: place, error: placeError } = await supabase
+    const { data: place, error: placeError } = await supabaseAdmin
       .from('places')
       .select('id')
       .eq('id', place_id)
@@ -150,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already favorited
-    const { data: existing, error: existingError } = await supabase
+    const { data: existing, error: existingError } = await supabaseAdmin
       .from('favorites')
       .select('id')
       .eq('user_id', user.id)
@@ -161,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     if (existing && !existingError) {
       // Update existing favorite
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('favorites')
         .update({
           notes: notes || null,
@@ -185,7 +154,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Create new favorite
-      const { data: newFavorite, error: createError } = await supabase
+      const { data: newFavorite, error: createError } = await supabaseAdmin
         .from('favorites')
         .insert({
           user_id: user.id,
@@ -224,7 +193,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/favorites?place_id=123 - Remove favorite
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromSupabase()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
@@ -251,7 +220,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Remove favorite from Supabase
-    const { error, count } = await supabase
+    const { error, count } = await supabaseAdmin
       .from('favorites')
       .delete()
       .eq('user_id', user.id)

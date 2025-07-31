@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
   apiVersion: '2025-07-30.basil',
@@ -47,7 +42,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if user already exists in Supabase
-        const { data: existingUser } = await supabase
+        const { data: existingUser } = await supabaseAdmin
           .from('user_profiles')
           .select('*')
           .eq('email', email)
@@ -57,7 +52,7 @@ export async function POST(request: NextRequest) {
 
         if (user) {
           // User exists, just upgrade to paid
-          const { error } = await supabase
+          const { error } = await supabaseAdmin
             .from('user_profiles')
             .update({ is_paid: true, updated_at: new Date().toISOString() })
             .eq('id', user.id)
@@ -73,7 +68,7 @@ export async function POST(request: NextRequest) {
 
         // Record the payment in Supabase
         const amountCents = paymentIntent.amount
-        await supabase
+        await supabaseAdmin
           .from('payments')
           .upsert({
             user_id: user.id,
@@ -108,7 +103,7 @@ export async function POST(request: NextRequest) {
 
           if (user) {
             // User exists, just upgrade to paid
-            const { error } = await supabase
+            const { error } = await supabaseAdmin
               .from('user_profiles')
               .update({ is_paid: true, updated_at: new Date().toISOString() })
               .eq('id', user.id)
@@ -124,7 +119,7 @@ export async function POST(request: NextRequest) {
 
           // Record the payment in Supabase
           const amountCents = session.amount_total || parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900')
-          await supabase
+          await supabaseAdmin
             .from('payments')
             .upsert({
               user_id: user.id,

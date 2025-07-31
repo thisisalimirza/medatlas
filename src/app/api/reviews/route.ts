@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+import { supabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
 
 // GET /api/reviews?place_id=123
 export async function GET(request: NextRequest) {
@@ -21,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get reviews from Supabase
-    const { data: reviews, error } = await supabase
+    const { data: reviews, error } = await supabaseAdmin
       .from('reviews')
       .select(`
         id,
@@ -51,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     let users: { id: string; stage: string; display_name: string }[] = []
     if (userIds.length > 0) {
-      const { data: userData, error: userError } = await supabase
+      const { data: userData, error: userError } = await supabaseAdmin
         .from('user_profiles')
         .select('id, stage, display_name')
         .in('id', userIds)
@@ -104,35 +98,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper function to get current user from Supabase
-async function getCurrentUserFromSupabase() {
-  try {
-    const cookieStore = await cookies()
-    const session = cookieStore.get('sb-access-token')?.value
-    
-    if (!session) return null
-
-    const { data: { user }, error } = await supabase.auth.getUser(session)
-    if (error || !user) return null
-
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !profile) return null
-    return profile
-  } catch (error) {
-    console.error('Get current user error:', error)
-    return null
-  }
-}
 
 // POST /api/reviews - Create or update review
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromSupabase()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
@@ -174,7 +144,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if place exists in Supabase
-    const { data: place, error: placeError } = await supabase
+    const { data: place, error: placeError } = await supabaseAdmin
       .from('places')
       .select('id')
       .eq('id', place_id)
@@ -188,7 +158,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already reviewed this place
-    const { data: existingReview, error: existingError } = await supabase
+    const { data: existingReview, error: existingError } = await supabaseAdmin
       .from('reviews')
       .select('id')
       .eq('user_id', user.id)
@@ -207,7 +177,7 @@ export async function POST(request: NextRequest) {
 
     if (existingReview && !existingError) {
       // Update existing review
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('reviews')
         .update(reviewData)
         .eq('id', existingReview.id)
@@ -228,7 +198,7 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Create new review
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('reviews')
         .insert({
           ...reviewData,

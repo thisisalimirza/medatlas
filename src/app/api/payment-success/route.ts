@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
   apiVersion: '2025-07-30.basil',
 })
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { session_id } = body
+    const { session_id, password, stage } = body
 
     if (!session_id) {
       return NextResponse.json(
@@ -44,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists in Supabase
-    const { data: existingUser, error: findError } = await supabase
+    const { data: existingUser, error: findError } = await supabaseAdmin
       .from('user_profiles')
       .select('*')
       .eq('email', email)
@@ -53,10 +46,11 @@ export async function POST(request: NextRequest) {
     let user
     if (existingUser && !findError) {
       // Update existing user to paid status
-      const { data: updatedUser, error: updateError } = await supabase
+      const { data: updatedUser, error: updateError } = await supabaseAdmin
         .from('user_profiles')
         .update({ 
           is_paid: true,
+          stage: stage || updatedUser.stage || 'premed',
           updated_at: new Date().toISOString()
         })
         .eq('id', existingUser.id)
@@ -71,10 +65,22 @@ export async function POST(request: NextRequest) {
         )
       }
       user = updatedUser
+
+      // If password provided, update the user's auth password
+      if (password) {
+        const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
+          user.id,
+          { password }
+        )
+        if (passwordError) {
+          console.error('Password update error:', passwordError)
+        }
+      }
     } else {
       // Create new user in Supabase auth first
-      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
+        password: password || Math.random().toString(36).slice(-8), // Random password if not provided
         email_confirm: true
       })
 
@@ -87,11 +93,11 @@ export async function POST(request: NextRequest) {
       }
 
       // Update user_profiles with payment status (the trigger should have created the profile)
-      const { data: newUser, error: createError } = await supabase
+      const { data: newUser, error: createError } = await supabaseAdmin
         .from('user_profiles')
         .update({
           is_paid: true,
-          stage: 'ms1', // Default stage, will be updated during password setup
+          stage: stage || 'premed',
           updated_at: new Date().toISOString()
         })
         .eq('id', authUser.user?.id)
@@ -110,9 +116,9 @@ export async function POST(request: NextRequest) {
 
     // Record the payment in Supabase
     const amountCents = session.amount_total || parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900')
-    const { error: paymentError } = await supabase
+    const { error: paymentError } = await supabaseAdmin
       .from('payments')
-      .insert({
+      .upsert({
         user_id: user.id,
         stripe_session_id: session_id,
         amount_cents: amountCents,
@@ -123,21 +129,6 @@ export async function POST(request: NextRequest) {
       console.error('Payment record error:', paymentError)
       // Don't fail the whole process if payment recording fails
     }
-
-    // Create JWT token and set cookie
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '30d' }
-    )
-
-    const cookieStore = await cookies()
-    cookieStore.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 // 30 days
-    })
 
     return NextResponse.json({
       success: true,

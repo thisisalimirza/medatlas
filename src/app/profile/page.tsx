@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 
 interface UserProfile {
@@ -21,7 +22,7 @@ interface UserProfile {
 }
 
 export default function ProfilePage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, refreshUser } = useAuth()
   const router = useRouter()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -47,48 +48,90 @@ export default function ProfilePage() {
     }
 
     if (user) {
-      fetchProfile()
-    }
-  }, [user, authLoading, router])
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch('/api/profile')
-      const data = await response.json()
-      
-      if (data.success) {
-        setProfile(data.profile)
-        setFormData(data.profile)
-      } else {
-        setError(data.error || 'Failed to load profile')
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile:', error)
-      setError('Failed to load profile')
-    } finally {
+      // Use the user data from auth context directly
+      setProfile(user as any)
+      setFormData(user as any)
       setLoading(false)
     }
-  }
+  }, [user, authLoading, router])
 
   const handleSave = async () => {
     setSaving(true)
     setError('')
 
     try {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      if (!user) {
+        setError('User not authenticated')
+        return
+      }
+
+      // Validate username if provided
+      if (formData.username && formData.username !== user.username) {
+        const { data: existingUser } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .eq('username', formData.username)
+          .neq('id', user.id)
+          .single()
+
+        if (existingUser) {
+          setError('Username is already taken')
+          return
+        }
+
+        // Validate username format
+        const usernameRegex = /^[a-zA-Z0-9_-]+$/
+        if (!usernameRegex.test(formData.username)) {
+          setError('Username can only contain letters, numbers, hyphens, and underscores')
+          return
+        }
+
+        if (formData.username.length < 3 || formData.username.length > 30) {
+          setError('Username must be between 3 and 30 characters')
+          return
+        }
+      }
+
+      // Update user profile in Supabase
+      const updateData = {
+        display_name: formData.display_name,
+        username: formData.username,
+        stage: formData.stage,
+        bio: formData.bio,
+        location_city: formData.location_city,
+        location_state: formData.location_state,
+        undergraduate_school: formData.undergraduate_school,
+        medical_school: formData.medical_school,
+        graduation_year: formData.graduation_year,
+        updated_at: new Date().toISOString()
+      }
+
+      // Remove undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key as keyof typeof updateData] === undefined) {
+          delete updateData[key as keyof typeof updateData]
+        }
       })
 
-      const data = await response.json()
-      
-      if (data.success) {
-        setProfile(data.profile)
-        setEditing(false)
-      } else {
-        setError(data.error || 'Failed to save profile')
+      const { data: updatedProfile, error } = await supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('id', user.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Profile update error:', error)
+        setError('Failed to update profile')
+        return
       }
+
+      // Update local state
+      setProfile(updatedProfile)
+      setEditing(false)
+      
+      // Refresh the auth context to get the updated user data
+      await refreshUser()
     } catch (error) {
       console.error('Failed to save profile:', error)
       setError('Failed to save profile')

@@ -1,41 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
-
-// Helper function to get current user from Supabase
-async function getCurrentUserFromSupabase() {
-  try {
-    const cookieStore = await cookies()
-    const session = cookieStore.get('sb-access-token')?.value
-    
-    if (!session) return null
-
-    const { data: { user }, error } = await supabase.auth.getUser(session)
-    if (error || !user) return null
-
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !profile) return null
-    return profile
-  } catch (error) {
-    console.error('Get current user error:', error)
-    return null
-  }
-}
+import { supabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
 
 // GET /api/profile - Get current user's profile
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromSupabase()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
@@ -60,7 +29,7 @@ export async function GET(request: NextRequest) {
 // PUT /api/profile - Update current user's profile
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromSupabase()
+    const user = await getCurrentUser()
     
     if (!user) {
       return NextResponse.json(
@@ -85,7 +54,7 @@ export async function PUT(request: NextRequest) {
     // Validate username if provided
     if (username) {
       // Check if username is already taken by another user
-      const { data: existingUser, error: usernameError } = await supabase
+      const { data: existingUser, error: usernameError } = await supabaseAdmin
         .from('user_profiles')
         .select('id')
         .eq('username', username)
@@ -137,7 +106,7 @@ export async function PUT(request: NextRequest) {
       }
     })
 
-    const { data: updatedProfile, error } = await supabase
+    const { data: updatedProfile, error } = await supabaseAdmin
       .from('user_profiles')
       .update(updateData)
       .eq('id', user.id)

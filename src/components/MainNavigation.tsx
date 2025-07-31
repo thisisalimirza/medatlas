@@ -45,6 +45,7 @@ const navigationData: NavSection[] = [
   {
     label: "Med Student Tools",
     items: [
+      { icon: "🏥", label: "Summer Programs", href: "/tools/summer-programs" },
       { icon: "📖", label: "Step 1 Prep", href: "/step1-prep", requiresAuth: true, requiresPaid: true },
       { icon: "🩺", label: "Clinical Skills", href: "/clinical-skills", requiresAuth: true, requiresPaid: true },
       { icon: "🧾", label: "Rotation Tracker", href: "/rotation-tracker", requiresAuth: true, requiresPaid: true },
