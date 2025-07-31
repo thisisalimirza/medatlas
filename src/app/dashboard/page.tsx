@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
 
 interface Favorite {

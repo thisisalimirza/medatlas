@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import Header from '@/components/Header'
 import ComparisonTool from '@/components/ComparisonTool'
 

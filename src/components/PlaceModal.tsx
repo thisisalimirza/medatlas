@@ -3,7 +3,7 @@
 import { Place } from '@/types'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import AuthModal from './AuthModal'
 import ReviewForm from './ReviewForm'
 
