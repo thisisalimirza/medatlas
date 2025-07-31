@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         .from('user_profiles')
         .update({ 
           is_paid: true,
-          stage: stage || updatedUser.stage || 'premed',
+          stage: stage || existingUser.stage || 'premed',
           updated_at: new Date().toISOString()
         })
         .eq('id', existingUser.id)
