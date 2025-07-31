@@ -24,13 +24,7 @@ interface AuthContextType {
   user: UserProfile | null
   session: Session | null
   loading: boolean
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  signup: (data: {
-    email: string
-    password: string
-    stage: string
-    displayName?: string
-  }) => Promise<{ success: boolean; error?: string }>
+  sendMagicLink: (email: string, stage?: string, displayName?: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -185,39 +179,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string) => {
+  const sendMagicLink = async (email: string, stage?: string, displayName?: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email,
-        password
-      })
-
-      if (error) {
-        return { success: false, error: error.message }
-      }
-
-      // User profile will be loaded by the auth state change listener
-      return { success: true }
-    } catch (error) {
-      console.error('Login error:', error)
-      return { success: false, error: 'Network error' }
-    }
-  }
-
-  const signup = async (signupData: {
-    email: string
-    password: string
-    stage: string
-    displayName?: string
-  }) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: signupData.email,
-        password: signupData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
-            stage: signupData.stage,
-            display_name: signupData.displayName
+            stage: stage || 'premed',
+            display_name: displayName || email.split('@')[0]
           }
         }
       })
@@ -226,10 +196,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: error.message }
       }
 
-      // User profile will be created by the database trigger
       return { success: true }
     } catch (error) {
-      console.error('Signup error:', error)
+      console.error('Magic link error:', error)
       return { success: false, error: 'Network error' }
     }
   }
@@ -274,8 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       session,
       loading,
-      login,
-      signup,
+      sendMagicLink,
       logout,
       refreshUser
     }}>

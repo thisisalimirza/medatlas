@@ -12,14 +12,14 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: AuthModalProps) {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    stage: 'ms1'
+    stage: 'premed',
+    displayName: ''
   })
   const [errors, setErrors] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [userCheckResult, setUserCheckResult] = useState<any>(null)
-  const [step, setStep] = useState<'email' | 'password' | 'checkout'>('email')
-  const { login } = useAuth()
+  const [step, setStep] = useState<'email' | 'sent' | 'checkout'>('email')
+  const { sendMagicLink } = useAuth()
 
   const medicalStages = [
     { value: 'premed', label: 'Pre-med Student', emoji: '📚' },
@@ -60,8 +60,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
         setUserCheckResult(data)
         
         if (data.userExists && data.isPaid) {
-          // User exists and is paid - ask for password to login
-          setStep('password')
+          // User exists and is paid - send magic link
+          const result = await sendMagicLink(formData.email)
+          
+          if (result.success) {
+            setStep('sent')
+          } else {
+            setErrors([result.error || 'Failed to send login link'])
+          }
         } else {
           // New user or unpaid user - proceed to checkout
           setStep('checkout')
@@ -72,33 +78,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
     } catch (error) {
       console.error('User check error:', error)
       setErrors(['Failed to check user status. Please try again.'])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setErrors([])
-
-    if (!formData.password) {
-      setErrors(['Please enter your password'])
-      setLoading(false)
-      return
-    }
-
-    try {
-      const result = await login(formData.email, formData.password)
-      
-      if (result.success) {
-        handleClose()
-      } else {
-        setErrors([result.error || 'Login failed'])
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      setErrors(['Login failed. Please try again.'])
     } finally {
       setLoading(false)
     }
@@ -115,7 +94,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: formData.email
+          email: formData.email,
+          stage: formData.stage,
+          displayName: formData.displayName
         })
       })
 
@@ -141,7 +122,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
   }
 
   const resetModal = () => {
-    setFormData({ email: '', password: '', stage: 'ms1' })
+    setFormData({ email: '', stage: 'premed', displayName: '' })
     setErrors([])
     setLoading(false)
     setUserCheckResult(null)
@@ -229,58 +210,41 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
             </form>
           )}
 
-          {step === 'password' && userCheckResult && (
+          {step === 'sent' && (
             <div>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                 <div className="flex items-center space-x-2">
-                  <span className="text-green-600">✅</span>
+                  <span className="text-green-600">📧</span>
                   <div>
-                    <p className="text-green-800 font-medium">Welcome back!</p>
-                    <p className="text-green-700 text-sm">You already have a MedAtlas Pro account.</p>
+                    <p className="text-green-800 font-medium">Magic link sent!</p>
+                    <p className="text-green-700 text-sm">Check your email for a secure login link.</p>
                   </div>
                 </div>
               </div>
 
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                  />
+              <div className="text-center">
+                <div className="text-4xl mb-4">✨</div>
+                <h3 className="text-lg font-semibold mb-2">Check your inbox</h3>
+                <p className="text-gray-600 mb-6">
+                  We sent a magic login link to <strong>{formData.email}</strong>
+                </p>
+
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <h4 className="font-medium mb-2">🔍 Don't see it?</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Check your spam/junk folder</li>
+                    <li>• The link expires in 1 hour</li>
+                    <li>• Try clicking the link from your phone if on desktop</li>
+                  </ul>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Password</label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setStep('email')}
-                    className="flex-1 px-4 py-3 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    ← Back
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 btn-red disabled:opacity-50 disabled:cursor-not-allowed text-lg py-3"
-                  >
-                    {loading ? 'Logging in...' : 'Log In'}
-                  </button>
-                </div>
-              </form>
+                <button
+                  onClick={() => setStep('email')}
+                  className="text-brand-red hover:underline text-sm"
+                >
+                  ← Try a different email
+                </button>
+              </div>
             </div>
           )}
 
@@ -310,6 +274,36 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
                   />
                 </div>
+
+                {!userCheckResult?.userExists && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Display Name (Optional)</label>
+                      <input
+                        type="text"
+                        value={formData.displayName}
+                        onChange={(e) => handleInputChange('displayName', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                        placeholder="How should others see your name?"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Current Stage</label>
+                      <select
+                        value={formData.stage}
+                        onChange={(e) => handleInputChange('stage', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                      >
+                        {medicalStages.map(stage => (
+                          <option key={stage.value} value={stage.value}>
+                            {stage.emoji} {stage.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </>
+                )}
 
                 {/* Pricing Info */}
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">

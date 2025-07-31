@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     } else if (!isPaid) {
       message = 'Upgrade to MedAtlas Pro to access all premium features.'
     } else {
-      message = 'Welcome back! Please enter your password to continue.'
+      message = 'Welcome back! We\'ll send you a secure login link.'
     }
 
     return NextResponse.json({
