@@ -1,16 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 )
 
+// Helper function to get current user from Supabase
+async function getCurrentUserFromSupabase() {
+  try {
+    const cookieStore = await cookies()
+    const session = cookieStore.get('sb-access-token')?.value
+    
+    if (!session) return null
+
+    const { data: { user }, error } = await supabase.auth.getUser(session)
+    if (error || !user) return null
+
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || !profile) return null
+    return profile
+  } catch (error) {
+    console.error('Get current user error:', error)
+    return null
+  }
+}
+
 // GET /api/profile - Get current user's profile
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUserFromSupabase()
     
     if (!user) {
       return NextResponse.json(
@@ -19,24 +44,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user profile from Supabase
-    const { data: profile, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    if (error) {
-      console.error('Profile fetch error:', error)
-      return NextResponse.json(
-        { success: false, error: 'Failed to fetch profile' },
-        { status: 500 }
-      )
-    }
-
     return NextResponse.json({
       success: true,
-      profile
+      profile: user
     })
   } catch (error) {
     console.error('Get profile error:', error)
@@ -50,7 +60,7 @@ export async function GET(request: NextRequest) {
 // PUT /api/profile - Update current user's profile
 export async function PUT(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUserFromSupabase()
     
     if (!user) {
       return NextResponse.json(
@@ -76,7 +86,7 @@ export async function PUT(request: NextRequest) {
     if (username) {
       // Check if username is already taken by another user
       const { data: existingUser, error: usernameError } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select('id')
         .eq('username', username)
         .neq('id', user.id)
@@ -128,7 +138,7 @@ export async function PUT(request: NextRequest) {
     })
 
     const { data: updatedProfile, error } = await supabase
-      .from('users')
+      .from('user_profiles')
       .update(updateData)
       .eq('id', user.id)
       .select()

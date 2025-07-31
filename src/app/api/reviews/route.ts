@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     let users: { id: string; stage: string; display_name: string }[] = []
     if (userIds.length > 0) {
       const { data: userData, error: userError } = await supabase
-        .from('users')
+        .from('user_profiles')
         .select('id, stage, display_name')
         .in('id', userIds)
       
@@ -104,10 +104,35 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Helper function to get current user from Supabase
+async function getCurrentUserFromSupabase() {
+  try {
+    const cookieStore = await cookies()
+    const session = cookieStore.get('sb-access-token')?.value
+    
+    if (!session) return null
+
+    const { data: { user }, error } = await supabase.auth.getUser(session)
+    if (error || !user) return null
+
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || !profile) return null
+    return profile
+  } catch (error) {
+    console.error('Get current user error:', error)
+    return null
+  }
+}
+
 // POST /api/reviews - Create or update review
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUserFromSupabase()
     
     if (!user) {
       return NextResponse.json(

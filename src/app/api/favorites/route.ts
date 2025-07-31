@@ -1,11 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { db } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
+
+// Helper function to get current user from Supabase
+async function getCurrentUserFromSupabase() {
+  try {
+    const cookieStore = await cookies()
+    const session = cookieStore.get('sb-access-token')?.value
+    
+    if (!session) return null
+
+    const { data: { user }, error } = await supabase.auth.getUser(session)
+    if (error || !user) return null
+
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || !profile) return null
+    return profile
+  } catch (error) {
+    console.error('Get current user error:', error)
+    return null
+  }
+}
 
 // GET /api/favorites - Get user's favorite places
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUserFromSupabase()
     
     if (!user) {
       return NextResponse.json(
@@ -21,56 +51,47 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get favorites with place details
-    const favorites = db.prepare(`
-      SELECT 
-        f.id as favorite_id,
-        f.notes,
-        f.application_deadline,
-        f.created_at,
-        p.id,
-        p.name,
-        p.city,
-        p.state,
-        p.country,
-        p.type,
-        p.metrics
-      FROM favorites f
-      JOIN places p ON f.place_id = p.id
-      WHERE f.user_id = ?
-      ORDER BY f.created_at DESC
-    `).all(user.id)
+    // Get favorites with place details from Supabase
+    const { data: favorites, error } = await supabase
+      .from('favorites')
+      .select(`
+        id,
+        notes,
+        application_deadline,
+        created_at,
+        places (
+          id,
+          name,
+          location_city,
+          location_state,
+          location_country,
+          type,
+          tuition_in_state,
+          tuition_out_state,
+          mcat_avg,
+          gpa_avg,
+          acceptance_rate,
+          img_friendly
+        )
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
 
-    const formattedFavorites = favorites.map((fav: any) => {
-      // Parse metrics to get additional data
-      let metrics = {}
-      try {
-        metrics = JSON.parse(fav.metrics || '{}')
-      } catch (e) {
-        metrics = {}
-      }
+    if (error) {
+      console.error('Supabase favorites error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch favorites' },
+        { status: 500 }
+      )
+    }
 
-      return {
-        favorite_id: fav.favorite_id,
-        notes: fav.notes,
-        application_deadline: fav.application_deadline,
-        created_at: fav.created_at,
-        place: {
-          id: fav.id,
-          name: fav.name,
-          location_city: fav.city,
-          location_state: fav.state,
-          location_country: fav.country,
-          type: fav.type,
-          tuition_in_state: (metrics as any).tuition_in_state,
-          tuition_out_state: (metrics as any).tuition_out_state,
-          mcat_avg: (metrics as any).mcat_avg,
-          gpa_avg: (metrics as any).gpa_avg,
-          acceptance_rate: (metrics as any).acceptance_rate,
-          img_friendly: Boolean((metrics as any).img_friendly)
-        }
-      }
-    })
+    const formattedFavorites = (favorites || []).map((fav: any) => ({
+      favorite_id: fav.id,
+      notes: fav.notes,
+      application_deadline: fav.application_deadline,
+      created_at: fav.created_at,
+      place: fav.places
+    }))
 
     return NextResponse.json({
       success: true,
@@ -88,7 +109,7 @@ export async function GET(request: NextRequest) {
 // POST /api/favorites - Add/update favorite
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUserFromSupabase()
     
     if (!user) {
       return NextResponse.json(
@@ -114,9 +135,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if place exists
-    const place = db.prepare('SELECT id FROM places WHERE id = ?').get(place_id)
-    if (!place) {
+    // Check if place exists in Supabase
+    const { data: place, error: placeError } = await supabase
+      .from('places')
+      .select('id')
+      .eq('id', place_id)
+      .single()
+
+    if (placeError || !place) {
       return NextResponse.json(
         { success: false, error: 'Place not found' },
         { status: 404 }
@@ -124,19 +150,33 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if already favorited
-    const existing = db.prepare(`
-      SELECT id FROM favorites WHERE user_id = ? AND place_id = ?
-    `).get(user.id, place_id) as { id: number } | undefined
+    const { data: existing, error: existingError } = await supabase
+      .from('favorites')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('place_id', place_id)
+      .single()
 
     const now = new Date().toISOString()
 
-    if (existing) {
+    if (existing && !existingError) {
       // Update existing favorite
-      db.prepare(`
-        UPDATE favorites 
-        SET notes = ?, application_deadline = ?, updated_at = ?
-        WHERE user_id = ? AND place_id = ?
-      `).run(notes || null, application_deadline || null, now, user.id, place_id)
+      const { error: updateError } = await supabase
+        .from('favorites')
+        .update({
+          notes: notes || null,
+          application_deadline: application_deadline || null,
+          updated_at: now
+        })
+        .eq('id', existing.id)
+
+      if (updateError) {
+        console.error('Update favorite error:', updateError)
+        return NextResponse.json(
+          { success: false, error: 'Failed to update favorite' },
+          { status: 500 }
+        )
+      }
 
       return NextResponse.json({
         success: true,
@@ -145,15 +185,31 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Create new favorite
-      const result = db.prepare(`
-        INSERT INTO favorites (user_id, place_id, notes, application_deadline, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(user.id, place_id, notes || null, application_deadline || null, now, now)
+      const { data: newFavorite, error: createError } = await supabase
+        .from('favorites')
+        .insert({
+          user_id: user.id,
+          place_id: place_id,
+          notes: notes || null,
+          application_deadline: application_deadline || null,
+          created_at: now,
+          updated_at: now
+        })
+        .select('id')
+        .single()
+
+      if (createError) {
+        console.error('Create favorite error:', createError)
+        return NextResponse.json(
+          { success: false, error: 'Failed to add favorite' },
+          { status: 500 }
+        )
+      }
 
       return NextResponse.json({
         success: true,
         message: 'Place added to favorites',
-        favorite_id: result.lastInsertRowid
+        favorite_id: newFavorite.id
       })
     }
   } catch (error) {
@@ -168,7 +224,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/favorites?place_id=123 - Remove favorite
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
+    const user = await getCurrentUserFromSupabase()
     
     if (!user) {
       return NextResponse.json(
@@ -194,12 +250,22 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Remove favorite
-    const result = db.prepare(`
-      DELETE FROM favorites WHERE user_id = ? AND place_id = ?
-    `).run(user.id, placeId)
+    // Remove favorite from Supabase
+    const { error, count } = await supabase
+      .from('favorites')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('place_id', placeId)
 
-    if (result.changes === 0) {
+    if (error) {
+      console.error('Delete favorite error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to remove favorite' },
+        { status: 500 }
+      )
+    }
+
+    if (count === 0) {
       return NextResponse.json(
         { success: false, error: 'Favorite not found' },
         { status: 404 }

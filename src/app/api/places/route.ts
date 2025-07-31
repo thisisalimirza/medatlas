@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,122 +15,114 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
 
-    let query = ''
-    let params: any[] = []
+    let query = supabase.from('places').select('*')
 
+    // Apply search filter
     if (search.trim()) {
-      // Use FTS5 search
-      query = `
-        SELECT p.*, 
-          json_extract(p.metrics, '$.tuition') as tuition_in_state,
-          json_extract(p.metrics, '$.tuition_out_state') as tuition_out_state,
-          json_extract(p.metrics, '$.mcat_avg') as mcat_avg,
-          json_extract(p.metrics, '$.gpa_avg') as gpa_avg,
-          json_extract(p.metrics, '$.acceptance_rate') as acceptance_rate,
-          json_extract(p.metrics, '$.img_friendly') as img_friendly,
-          json_extract(p.metrics, '$.usmle_step1_pass_rate') as usmle_step1_pass_rate,
-          json_extract(p.metrics, '$.match_rate') as match_rate
-        FROM places p
-        JOIN place_search ps ON p.id = ps.rowid
-        WHERE place_search MATCH ?
-      `
-      params.push(search)
-    } else {
-      // Regular query
-      query = `
-        SELECT p.*,
-          json_extract(p.metrics, '$.tuition') as tuition_in_state,
-          json_extract(p.metrics, '$.tuition_out_state') as tuition_out_state,
-          json_extract(p.metrics, '$.mcat_avg') as mcat_avg,
-          json_extract(p.metrics, '$.gpa_avg') as gpa_avg,
-          json_extract(p.metrics, '$.acceptance_rate') as acceptance_rate,
-          json_extract(p.metrics, '$.img_friendly') as img_friendly,
-          json_extract(p.metrics, '$.usmle_step1_pass_rate') as usmle_step1_pass_rate,
-          json_extract(p.metrics, '$.match_rate') as match_rate
-        FROM places p
-        WHERE 1=1
-      `
+      // Use Supabase text search - search in name, city, state
+      query = query.or(`name.ilike.%${search}%,location_city.ilike.%${search}%,location_state.ilike.%${search}%`)
     }
 
+    // Apply type filter
     if (type) {
-      query += ' AND p.type = ?'
-      params.push(type)
+      query = query.eq('type', type)
     }
 
-    query += ' ORDER BY p.rank_overall DESC, p.name ASC'
-    query += ' LIMIT ? OFFSET ?'
-    params.push(limit, offset)
+    // Apply pagination and ordering
+    query = query
+      .order('rank_overall', { ascending: false })
+      .order('name', { ascending: true })
+      .range(offset, offset + limit - 1)
 
-    const places = db.prepare(query).all(...params)
+    const { data: places, error, count } = await query
 
-    // Get total count
-    let countQuery = ''
-    let countParams: any[] = []
-
-    if (search.trim()) {
-      countQuery = `
-        SELECT COUNT(*) as total
-        FROM places p
-        JOIN place_search ps ON p.id = ps.rowid
-        WHERE place_search MATCH ?
-      `
-      countParams.push(search)
-    } else {
-      countQuery = 'SELECT COUNT(*) as total FROM places WHERE 1=1'
+    if (error) {
+      console.error('Places fetch error:', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch places' },
+        { status: 500 }
+      )
     }
 
-    if (type) {
-      countQuery += ' AND type = ?'
-      countParams.push(type)
-    }
+    // Format the places data to match the expected structure
+    const formattedPlaces = (places || []).map((place: any) => {
+      // Parse JSON fields if they're stored as strings
+      let metrics = {}
+      let tags = []
+      let scores = {}
+      
+      try {
+        if (typeof place.metrics === 'string') {
+          metrics = JSON.parse(place.metrics)
+        } else if (place.metrics) {
+          metrics = place.metrics
+        }
+      } catch (e) {
+        metrics = {}
+      }
 
-    const totalResult = db.prepare(countQuery).get(...countParams) as { total: number }
-    const total = totalResult.total
+      try {
+        if (typeof place.tags === 'string') {
+          tags = JSON.parse(place.tags)
+        } else if (Array.isArray(place.tags)) {
+          tags = place.tags
+        }
+      } catch (e) {
+        tags = []
+      }
 
-    // Format the places data
-    const formattedPlaces = places.map((place: any) => ({
-      id: place.id,
-      slug: place.slug,
-      name: place.name,
-      type: place.type,
-      institution: place.institution,
-      city: place.city,
-      state: place.state,
-      country: place.country,
-      location_city: place.city,
-      location_state: place.state,
-      location_country: place.country,
-      lat: place.lat,
-      lng: place.lng,
-      photo_url: place.photo_url,
-      tags: JSON.parse(place.tags || '[]'),
-      rank_overall: place.rank_overall,
-      metrics: JSON.parse(place.metrics || '{}'),
-      scores: JSON.parse(place.scores || '{}'),
-      tuition_in_state: place.tuition_in_state,
-      tuition_out_state: place.tuition_out_state,
-      mcat_avg: place.mcat_avg,
-      gpa_avg: place.gpa_avg,
-      acceptance_rate: place.acceptance_rate,
-      img_friendly: Boolean(place.img_friendly),
-      usmle_step1_pass_rate: place.usmle_step1_pass_rate,
-      match_rate: place.match_rate,
-      created_at: place.created_at,
-      updated_at: place.updated_at
-    }))
+      try {
+        if (typeof place.scores === 'string') {
+          scores = JSON.parse(place.scores)
+        } else if (place.scores) {
+          scores = place.scores
+        }
+      } catch (e) {
+        scores = {}
+      }
+
+      return {
+        id: place.id,
+        slug: place.slug,
+        name: place.name,
+        type: place.type,
+        institution: place.institution,
+        city: place.location_city,
+        state: place.location_state,
+        country: place.location_country,
+        location_city: place.location_city,
+        location_state: place.location_state,
+        location_country: place.location_country,
+        lat: place.lat,
+        lng: place.lng,
+        photo_url: place.photo_url,
+        tuition_in_state: (metrics as any).tuition || place.tuition_in_state,
+        tuition_out_state: (metrics as any).tuition_out_state || place.tuition_out_state,
+        mcat_avg: (metrics as any).mcat_avg || place.mcat_avg,
+        gpa_avg: (metrics as any).gpa_avg || place.gpa_avg,
+        acceptance_rate: (metrics as any).acceptance_rate || place.acceptance_rate,
+        img_friendly: (metrics as any).img_friendly || place.img_friendly,
+        usmle_step1_pass_rate: (metrics as any).usmle_step1_pass_rate,
+        match_rate: (metrics as any).match_rate,
+        rank_overall: place.rank_overall,
+        tags: tags,
+        metrics: metrics,
+        scores: scores
+      }
+    })
 
     return NextResponse.json({
       success: true,
       data: formattedPlaces,
-      meta: {
-        total,
+      pagination: {
+        total: count || 0,
         limit,
         offset,
-        hasMore: (offset + limit) < total
+        hasMore: (count || 0) > offset + limit
       }
     })
   } catch (error) {
-    console.error('Error fetching places:', error)
+    console.error('Places API error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch places' },
       { status: 500 }

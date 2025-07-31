@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createUser, updateUserPaidStatus } from '@/lib/auth'
-import { db } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
   apiVersion: '2025-07-30.basil',
@@ -42,39 +46,41 @@ export async function POST(request: NextRequest) {
           break
         }
 
-        // Check if user already exists
-        let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any
+        // Check if user already exists in Supabase
+        const { data: existingUser } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('email', email)
+          .single()
+
+        let user = existingUser
 
         if (user) {
           // User exists, just upgrade to paid
-          updateUserPaidStatus(user.id, true)
-          console.log(`Updated existing user ${user.id} to paid status via payment intent`)
-        } else {
-          // Create new user account
-          const result = await createUser({
-            email,
-            password: Math.random().toString(36), // Random password
-            stage,
-            display_name: undefined
-          })
-
-          if (result.success && result.user) {
-            // Mark as paid immediately
-            updateUserPaidStatus(result.user.id, true)
-            user = { ...result.user, is_paid: 1 }
-            console.log(`Created new paid user ${user.id} via payment intent`)
-          } else {
-            console.error('Failed to create user from payment intent webhook:', result.error)
-            break
+          const { error } = await supabase
+            .from('user_profiles')
+            .update({ is_paid: true, updated_at: new Date().toISOString() })
+            .eq('id', user.id)
+          
+          if (!error) {
+            console.log(`Updated existing user ${user.id} to paid status via payment intent`)
           }
+        } else {
+          console.log(`User with email ${email} not found for payment intent ${paymentIntent.id}`)
+          // Don't create users here - they should be created during checkout flow
+          break
         }
 
-        // Record the payment
+        // Record the payment in Supabase
         const amountCents = paymentIntent.amount
-        db.prepare(`
-          INSERT OR IGNORE INTO payments (user_id, stripe_session_id, amount_cents)
-          VALUES (?, ?, ?)
-        `).run(user.id, paymentIntent.id, amountCents)
+        await supabase
+          .from('payments')
+          .upsert({
+            user_id: user.id,
+            stripe_session_id: paymentIntent.id,
+            amount_cents: amountCents,
+            created_at: new Date().toISOString()
+          })
 
         console.log(`Payment recorded for user ${user.id}, payment intent ${paymentIntent.id}`)
         break
@@ -91,39 +97,41 @@ export async function POST(request: NextRequest) {
             break
           }
 
-          // Check if user already exists
-          let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any
+          // Check if user already exists in Supabase
+          const { data: existingUser } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('email', email)
+            .single()
+
+          let user = existingUser
 
           if (user) {
             // User exists, just upgrade to paid
-            updateUserPaidStatus(user.id, true)
-            console.log(`Webhook: Updated existing user ${user.id} to paid status`)
-          } else {
-            // Create new user account (as backup - normally payment-success endpoint handles this)
-            const result = await createUser({
-              email,
-              password: Math.random().toString(36), // Random password
-              stage,
-              display_name: undefined
-            })
-
-            if (result.success && result.user) {
-              // Mark as paid immediately
-              updateUserPaidStatus(result.user.id, true)  
-              user = { ...result.user, is_paid: 1 }
-              console.log(`Webhook: Created new paid user ${user.id} (backup creation)`)
-            } else {
-              console.error('Webhook: Failed to create user:', result.error)
-              break
+            const { error } = await supabase
+              .from('user_profiles')
+              .update({ is_paid: true, updated_at: new Date().toISOString() })
+              .eq('id', user.id)
+            
+            if (!error) {
+              console.log(`Webhook: Updated existing user ${user.id} to paid status`)
             }
+          } else {
+            console.log(`Webhook: User with email ${email} not found for session ${session.id}`)
+            // Don't create users here - they should be created during checkout flow
+            break
           }
 
-          // Record the payment (use INSERT OR IGNORE to prevent duplicates)
+          // Record the payment in Supabase
           const amountCents = session.amount_total || parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900')
-          db.prepare(`
-            INSERT OR IGNORE INTO payments (user_id, stripe_session_id, amount_cents)
-            VALUES (?, ?, ?)
-          `).run(user.id, session.id, amountCents)
+          await supabase
+            .from('payments')
+            .upsert({
+              user_id: user.id,
+              stripe_session_id: session.id,
+              amount_cents: amountCents,
+              created_at: new Date().toISOString()
+            })
 
           console.log(`Webhook: Payment recorded for user ${user.id}, session ${session.id}`)
         }
