@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { createUser, createToken, updateUserPaidStatus } from '@/lib/auth'
-import { db } from '@/lib/database'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import jwt from 'jsonwebtoken'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
   apiVersion: '2025-07-30.basil',
 })
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,51 +35,89 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { email, stage } = session.metadata || {}
-    if (!email || !stage) {
+    const { email } = session.metadata || {}
+    if (!email) {
       return NextResponse.json(
-        { success: false, error: 'Missing user information' },
+        { success: false, error: 'Missing user email' },
         { status: 400 }
       )
     }
 
-    // Check if user already exists
-    let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as any
+    // Check if user already exists in Supabase
+    const { data: existingUser, error: findError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single()
 
-    if (user) {
-      // User exists, just upgrade to paid
-      updateUserPaidStatus(user.id, true)
-      user.is_paid = 1
+    let user
+    if (existingUser && !findError) {
+      // Update existing user to paid status
+      const { data: updatedUser, error: updateError } = await supabase
+        .from('users')
+        .update({ 
+          is_paid: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existingUser.id)
+        .select()
+        .single()
+
+      if (updateError) {
+        console.error('Update user error:', updateError)
+        return NextResponse.json(
+          { success: false, error: 'Failed to update account' },
+          { status: 500 }
+        )
+      }
+      user = updatedUser
     } else {
-      // Create new user account
-      const result = await createUser({
-        email,
-        password: Math.random().toString(36), // Random password (not used)
-        stage,
-        display_name: undefined
-      })
+      // Create new user account (they'll set password later)
+      const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert({
+          email,
+          is_paid: true,
+          stage: 'ms1', // Default stage, will be updated during password setup
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
 
-      if (!result.success || !result.user) {
+      if (createError) {
+        console.error('Create user error:', createError)
         return NextResponse.json(
           { success: false, error: 'Failed to create account' },
           { status: 500 }
         )
       }
-
-      // Mark as paid immediately
-      updateUserPaidStatus(result.user.id, true)
-      user = { ...result.user, is_paid: 1 }
+      user = newUser
     }
 
-    // Record the payment
+    // Record the payment in Supabase
     const amountCents = session.amount_total || parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900')
-    db.prepare(`
-      INSERT INTO payments (user_id, stripe_session_id, amount_cents)
-      VALUES (?, ?, ?)
-    `).run(user.id, session_id, amountCents)
+    const { error: paymentError } = await supabase
+      .from('payments')
+      .insert({
+        user_id: user.id,
+        stripe_session_id: session_id,
+        amount_cents: amountCents,
+        created_at: new Date().toISOString()
+      })
+
+    if (paymentError) {
+      console.error('Payment record error:', paymentError)
+      // Don't fail the whole process if payment recording fails
+    }
 
     // Create JWT token and set cookie
-    const token = await createToken(user)
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '30d' }
+    )
+
     const cookieStore = await cookies()
     cookieStore.set('auth-token', token, {
       httpOnly: true,
