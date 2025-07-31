@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
-import './globals.css'
-import { AuthProvider } from '@/contexts/SupabaseAuthContext'
 
 export const metadata: Metadata = {
-  title: 'MedAtlas - Medical School & Residency Explorer',
-  description: 'Filterable, searchable directory of medical schools, rotation sites, and residency programs with community-driven features.',
+  title: 'MedAtlas - Medical School Discovery',
+  description: 'Find and research medical schools',
 }
 
 export default function RootLayout({
@@ -14,10 +12,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+      <body style={{ margin: 0, padding: 0 }}>
+        {children}
       </body>
     </html>
   )
