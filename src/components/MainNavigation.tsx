@@ -36,6 +36,8 @@ const navigationData: NavSection[] = [
       { icon: "📈", label: "GPA Calculator", href: "/tools/gpa-calculator" },
       { icon: "✅", label: "Prerequisites Checker", href: "/tools/prerequisites-checker" },
       { icon: "📅", label: "Application Timeline", href: "/tools/application-timeline" },
+      { icon: "🗓️", label: "Premed Timeline", href: "/tools/premed-timeline" },
+      { icon: "📝", label: "Secondary Prompts", href: "/tools/secondary-prompts" },
       { icon: "💰", label: "Cost Calculator", href: "/tools/cost-calculator" },
       { icon: "⚖️", label: "School Comparison", href: "/tools/school-comparison" }
     ]
