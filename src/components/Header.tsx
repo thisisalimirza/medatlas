@@ -48,24 +48,26 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
               onClick={onToggleFiltersSidebar}
               className={`md:hidden p-2 transition-all duration-200 rounded-lg border-2 shadow-sm ${
                 isFiltersSidebarOpen 
-                  ? 'bg-brand-red text-white border-brand-red hover:bg-red-600 hover:border-red-600' 
+                  ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-md' 
                   : 'text-brand-red border-brand-red bg-white hover:bg-red-50 hover:shadow-md'
               }`}
             >
-              <span className="text-lg">🔧</span>
+              <span className={`text-lg ${isFiltersSidebarOpen ? '!text-white' : '!text-brand-red'}`}>🔧</span>
             </button>
             
             {/* Filter button - desktop version */}
             <button 
               onClick={onToggleFiltersSidebar}
-              className={`hidden md:flex border-2 items-center space-x-2 px-3 py-2 text-sm font-semibold transition-all duration-200 rounded-lg shadow-sm ${
+              className={`hidden md:flex border-2 items-center space-x-2 px-3 py-2 text-sm font-bold transition-all duration-200 rounded-lg shadow-sm ${
                 isFiltersSidebarOpen 
-                  ? 'bg-brand-red text-white border-brand-red hover:bg-red-600 hover:border-red-600' 
+                  ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-md' 
                   : 'text-brand-red border-brand-red bg-white hover:bg-red-50 hover:shadow-md'
               }`}
             >
-              <span>🔧</span>
-              <span>{isFiltersSidebarOpen ? 'Hide Filters' : 'Show Filters'}</span>
+              <span className={isFiltersSidebarOpen ? '!text-white' : '!text-brand-red'}>🔧</span>
+              <span className={isFiltersSidebarOpen ? '!text-white font-bold' : '!text-brand-red font-bold'}>
+                {isFiltersSidebarOpen ? 'Hide Filters' : 'Show Filters'}
+              </span>
             </button>
           </div>
 
