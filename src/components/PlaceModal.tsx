@@ -94,14 +94,16 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
           }
         })
         .catch(console.error)
-
-      // Check if favorited (only for paid users)
-      if (user && user.is_paid) {
-        checkIfFavorited()
-        checkIfInSchoolList()
-      }
     }
-  }, [place, isOpen, user])
+  }, [place, isOpen])
+
+  // Separate effect for user-dependent data to avoid unnecessary refetches
+  useEffect(() => {
+    if (place && isOpen && user && user.is_paid) {
+      checkIfFavorited()
+      checkIfInSchoolList()
+    }
+  }, [place?.id, isOpen, user?.id, user?.is_paid])
 
   const checkIfFavorited = async () => {
     if (!place) return

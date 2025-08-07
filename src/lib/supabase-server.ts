@@ -1,14 +1,22 @@
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
+// Lazy-load supabase admin client to avoid build-time errors
+export const getSupabaseAdmin = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+  
+  return createClient(supabaseUrl, serviceRoleKey)
+}
 
 // Helper function to get current authenticated user from Supabase
 export async function getCurrentUser() {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const cookieStore = await cookies()
     const accessToken = cookieStore.get('sb-access-token')?.value
     const refreshToken = cookieStore.get('sb-refresh-token')?.value
