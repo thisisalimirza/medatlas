@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { getSupabaseAdmin } from '@/lib/supabase-server'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
 
+    const supabaseAdmin = getSupabaseAdmin()
     let query = supabaseAdmin.from('places').select('*')
 
     // Apply search filter
