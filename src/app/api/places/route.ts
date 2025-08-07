@@ -14,8 +14,9 @@ export async function GET(request: NextRequest) {
 
     // Apply search filter
     if (search.trim()) {
-      // Use Supabase text search - search in name, city, state
-      query = query.or(`name.ilike.%${search}%,location_city.ilike.%${search}%,location_state.ilike.%${search}%`)
+      // Use Supabase text search with parameterized queries to prevent injection
+      const sanitizedSearch = search.trim().replace(/[%_]/g, '\\$&') // Escape SQL wildcards
+      query = query.or(`name.ilike.%${sanitizedSearch}%,location_city.ilike.%${sanitizedSearch}%,location_state.ilike.%${sanitizedSearch}%`)
     }
 
     // Apply type filter
