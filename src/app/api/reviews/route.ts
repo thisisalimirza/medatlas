@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
 
     // Get user info for non-anonymous reviews
     const userIds = (reviews || [])
-      .filter(review => !review.is_anonymous)
-      .map(review => review.user_id)
+      .filter((review: any) => !review.is_anonymous)
+      .map((review: any) => review.user_id)
 
     let users: { id: string; stage: string; display_name: string }[] = []
     if (userIds.length > 0) {
