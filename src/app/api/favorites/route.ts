@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Get favorites with place details from Supabase
-    const supabaseAdmin = getSupabaseAdmin()
     const { data: favorites, error } = await supabaseAdmin
       .from('favorites')
       .select(`
