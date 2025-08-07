@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
+import { getSupabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
 
 // GET /api/profile - Get current user's profile
 export async function GET(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     
     if (!user) {
@@ -29,6 +30,7 @@ export async function GET(request: NextRequest) {
 // PUT /api/profile - Update current user's profile
 export async function PUT(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     
     if (!user) {
