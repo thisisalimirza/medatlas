@@ -24,8 +24,9 @@ export async function GET(request: NextRequest) {
 
     // Apply search if specified
     if (search.trim()) {
-      // Use PostgreSQL full-text search
-      query = query.or(`name.ilike.%${search}%,city.ilike.%${search}%,institution.ilike.%${search}%`)
+      // Use PostgreSQL full-text search with sanitized input
+      const sanitizedSearch = search.trim().replace(/[%_]/g, '\\$&') // Escape SQL wildcards
+      query = query.or(`name.ilike.%${sanitizedSearch}%,city.ilike.%${sanitizedSearch}%,institution.ilike.%${sanitizedSearch}%`)
     }
 
     const { data: places, error } = await query
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Format the response to match the expected structure
-    const formattedPlaces = places?.map(place => ({
+    const formattedPlaces = places?.map((place: any) => ({
       id: place.id,
       slug: place.slug,
       name: place.name,

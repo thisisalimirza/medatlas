@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
+import { getSupabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
 
 // GET /api/favorites - Get user's favorite places
 export async function GET(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     
     if (!user) {
@@ -78,6 +79,7 @@ export async function GET(request: NextRequest) {
 // POST /api/favorites - Add/update favorite
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     
     if (!user) {
@@ -193,6 +195,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/favorites?place_id=123 - Remove favorite
 export async function DELETE(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     
     if (!user) {

@@ -7,8 +7,23 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 const createSupabaseClient = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Missing Supabase environment variables - using dummy client')
-    // Return a dummy client for build time
-    return createClient('https://dummy.supabase.co', 'dummy-key')
+    // Return a dummy client for build time that throws errors on actual usage
+    return {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+        getUser: () => Promise.reject(new Error('Supabase not configured')),
+        signIn: () => Promise.reject(new Error('Supabase not configured')),
+        signOut: () => Promise.reject(new Error('Supabase not configured')),
+      },
+      from: () => ({
+        select: () => Promise.reject(new Error('Supabase not configured')),
+        insert: () => Promise.reject(new Error('Supabase not configured')),
+        update: () => Promise.reject(new Error('Supabase not configured')),
+        delete: () => Promise.reject(new Error('Supabase not configured')),
+      })
+    } as any
   }
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
@@ -28,7 +43,20 @@ export const createServerClient = () => {
   
   if (!supabaseUrl || !serviceRoleKey) {
     console.warn('Missing Supabase server environment variables - using dummy client')
-    return createClient('https://dummy.supabase.co', 'dummy-key')
+    // Return a dummy client that throws errors on actual usage
+    return {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        getUser: () => Promise.reject(new Error('Supabase server not configured')),
+      },
+      from: () => ({
+        select: () => Promise.reject(new Error('Supabase server not configured')),
+        insert: () => Promise.reject(new Error('Supabase server not configured')),
+        update: () => Promise.reject(new Error('Supabase server not configured')),
+        delete: () => Promise.reject(new Error('Supabase server not configured')),
+      })
+    } as any
   }
   
   return createClient(

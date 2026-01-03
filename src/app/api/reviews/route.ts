@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
+import { getSupabaseAdmin, getCurrentUser } from '@/lib/supabase-server'
 
 // GET /api/reviews?place_id=123
 export async function GET(request: NextRequest) {
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get reviews from Supabase
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: reviews, error } = await supabaseAdmin
       .from('reviews')
       .select(`
@@ -40,8 +41,8 @@ export async function GET(request: NextRequest) {
 
     // Get user info for non-anonymous reviews
     const userIds = (reviews || [])
-      .filter(review => !review.is_anonymous)
-      .map(review => review.user_id)
+      .filter((review: any) => !review.is_anonymous)
+      .map((review: any) => review.user_id)
 
     let users: { id: string; stage: string; display_name: string }[] = []
     if (userIds.length > 0) {
@@ -144,6 +145,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if place exists in Supabase
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: place, error: placeError } = await supabaseAdmin
       .from('places')
       .select('id')

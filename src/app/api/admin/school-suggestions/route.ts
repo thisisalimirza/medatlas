@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { getSupabaseAdmin } from '@/lib/supabase-server'
 
 // Check if user is admin (you can expand this logic as needed)
 const isAdmin = (user: any) => {
@@ -9,6 +9,7 @@ const isAdmin = (user: any) => {
 
 export async function GET(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     if (!user || !isAdmin(user)) {
       return NextResponse.json(
@@ -55,6 +56,7 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getCurrentUser()
     if (!user || !isAdmin(user)) {
       return NextResponse.json(

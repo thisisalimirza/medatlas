@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { getSupabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user exists in Supabase
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: existingUser, error } = await supabaseAdmin
       .from('user_profiles')
       .select('id, email, is_paid, stage')

@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Format the response to match the expected structure
-    const formattedList = schoolList?.map(item => ({
+    const formattedList = schoolList?.map((item: any) => ({
       id: item.id,
       school_name: (item.places as any)?.name || 'Unknown School',
       city: (item.places as any)?.city,

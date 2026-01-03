@@ -35,7 +35,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
   }, [loading, refreshUser])
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left side - Navigation and Filters */}
@@ -46,26 +46,28 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
             {/* Filter button - mobile version */}
             <button 
               onClick={onToggleFiltersSidebar}
-              className={`md:hidden p-2 transition-colors rounded-lg ${
+              className={`md:hidden p-2 transition-all duration-200 rounded-lg border-2 shadow-sm ${
                 isFiltersSidebarOpen 
-                  ? 'bg-brand-red text-white' 
-                  : 'text-brand-red hover:bg-red-50'
+                  ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-md' 
+                  : 'text-brand-red border-brand-red bg-white hover:bg-red-50 hover:shadow-md'
               }`}
             >
-              <span className="text-lg">🔧</span>
+              <span className={`text-lg ${isFiltersSidebarOpen ? '!text-white' : '!text-brand-red'}`}>🔧</span>
             </button>
             
             {/* Filter button - desktop version */}
             <button 
               onClick={onToggleFiltersSidebar}
-              className={`hidden md:flex border items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
+              className={`hidden md:flex border-2 items-center space-x-2 px-3 py-2 text-sm font-bold transition-all duration-200 rounded-lg shadow-sm ${
                 isFiltersSidebarOpen 
-                  ? 'bg-brand-red text-white border-brand-red' 
-                  : 'text-brand-red border-brand-red hover:bg-red-50'
+                  ? 'bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700 shadow-md' 
+                  : 'text-brand-red border-brand-red bg-white hover:bg-red-50 hover:shadow-md'
               }`}
             >
-              <span>🔧</span>
-              <span>{isFiltersSidebarOpen ? 'Hide Filters' : 'Show Filters'}</span>
+              <span className={isFiltersSidebarOpen ? '!text-white' : '!text-brand-red'}>🔧</span>
+              <span className={isFiltersSidebarOpen ? '!text-white font-bold' : '!text-brand-red font-bold'}>
+                {isFiltersSidebarOpen ? 'Hide Filters' : 'Show Filters'}
+              </span>
             </button>
           </div>
 
