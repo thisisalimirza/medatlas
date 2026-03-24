@@ -172,7 +172,6 @@ function PaymentProcessor() {
       if (data.tokenHash) {
         try {
           const { error: otpError } = await supabase.auth.verifyOtp({
-            email: data.user.email,
             token_hash: data.tokenHash,
             type: 'email',
           })
