@@ -14,34 +14,76 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the session from the URL hash
-        const { data, error } = await supabase.auth.getSession()
+        console.log('Auth callback: Processing magic link...')
         
-        if (error) {
-          console.error('Auth callback error:', error)
-          setStatus('error')
-          setMessage('Authentication failed. Please try again.')
-          return
-        }
-
-        if (data.session) {
-          setStatus('success')
-          setMessage('Successfully logged in! Redirecting...')
+        // Get the current URL with all parameters
+        const url = new URL(window.location.href)
+        const accessToken = url.searchParams.get('access_token')
+        const refreshToken = url.searchParams.get('refresh_token')
+        
+        if (accessToken && refreshToken) {
+          console.log('Auth callback: Found tokens in URL, setting session...')
           
-          // Check if this was a payment flow
-          const isPayment = searchParams.get('payment') === 'true'
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          })
           
-          // Redirect after a brief success message
-          setTimeout(() => {
-            if (isPayment) {
-              router.push('/dashboard')
-            } else {
-              router.push('/')
-            }
-          }, 2000)
+          if (error) {
+            console.error('Auth callback error setting session:', error)
+            setStatus('error')
+            setMessage('Authentication failed. Please try again.')
+            return
+          }
+          
+          if (data.session) {
+            console.log('Auth callback: Session set successfully')
+            setStatus('success')
+            setMessage('Successfully logged in! Redirecting...')
+            
+            // Check if this was a payment flow
+            const isPayment = searchParams.get('payment') === 'true'
+            
+            // Redirect after a brief success message
+            setTimeout(() => {
+              if (isPayment) {
+                router.push('/dashboard')
+              } else {
+                router.push('/')
+              }
+            }, 1500)
+          } else {
+            console.error('Auth callback: No session created despite tokens')
+            setStatus('error')
+            setMessage('Authentication failed. Please try again.')
+          }
         } else {
-          setStatus('error')
-          setMessage('No valid session found. Please try logging in again.')
+          console.log('Auth callback: No tokens in URL, checking existing session...')
+          
+          // Try to get existing session
+          const { data, error } = await supabase.auth.getSession()
+          
+          if (error) {
+            console.error('Auth callback error getting session:', error)
+            setStatus('error')
+            setMessage('Authentication failed. Please try again.')
+            return
+          }
+          
+          if (data.session) {
+            console.log('Auth callback: Found existing session')
+            setStatus('success')
+            setMessage('Already logged in! Redirecting...')
+            
+            setTimeout(() => {
+              router.push('/')
+            }, 1000)
+          } else {
+            console.error('Auth callback: No session found')
+            setStatus('error')
+            setMessage('No valid session found. Please try logging in again.')
+          }
         }
       } catch (error) {
         console.error('Auth callback error:', error)

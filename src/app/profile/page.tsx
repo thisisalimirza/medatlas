@@ -5,34 +5,19 @@ import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
-import SchoolSuggestionForm from '@/components/SchoolSuggestionForm'
-
-interface UserProfile {
-  id: string
-  email: string
-  username: string
-  display_name: string
-  stage: string
-  bio: string
-  location_city: string
-  location_state: string
-  undergraduate_school: string
-  medical_school: string
-  graduation_year: number
-  created_at: string
-}
 
 export default function ProfilePage() {
   const { user, loading: authLoading, refreshUser } = useAuth()
   const router = useRouter()
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState(false)
-  const [formData, setFormData] = useState<Partial<UserProfile>>({})
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [showUndergraduateSuggestion, setShowUndergraduateSuggestion] = useState(false)
-  const [showMedicalSuggestion, setShowMedicalSuggestion] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [errors, setErrors] = useState<string[]>([])
+  
+  const [formData, setFormData] = useState({
+    email: '',
+    display_name: '',
+    stage: 'premed'
+  })
 
   const medicalStages = [
     { value: 'premed', label: 'Pre-med Student', emoji: '📚' },
@@ -51,398 +36,189 @@ export default function ProfilePage() {
     }
 
     if (user) {
-      // Use the user data from auth context directly
-      setProfile(user as any)
-      setFormData(user as any)
-      setLoading(false)
+      setFormData({
+        email: user.email || '',
+        display_name: user.display_name || '',
+        stage: user.stage || 'premed'
+      })
     }
   }, [user, authLoading, router])
 
-  const handleSave = async () => {
-    setSaving(true)
-    setError('')
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    setErrors([])
+    setMessage('')
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrors([])
+    setMessage('')
 
     try {
-      if (!user) {
-        setError('User not authenticated')
+      // Basic validation
+      if (!formData.display_name || formData.display_name.trim().length === 0) {
+        setErrors(['Display name is required'])
+        setLoading(false)
         return
       }
 
-      // Validate username if provided
-      if (formData.username && formData.username !== user.username) {
-        const { data: existingUser } = await supabase
-          .from('user_profiles')
-          .select('id')
-          .eq('username', formData.username)
-          .neq('id', user.id)
-          .single()
-
-        if (existingUser) {
-          setError('Username is already taken')
-          return
-        }
-
-        // Validate username format
-        const usernameRegex = /^[a-zA-Z0-9_-]+$/
-        if (!usernameRegex.test(formData.username)) {
-          setError('Username can only contain letters, numbers, hyphens, and underscores')
-          return
-        }
-
-        if (formData.username.length < 3 || formData.username.length > 30) {
-          setError('Username must be between 3 and 30 characters')
-          return
-        }
-      }
-
-      // Update user profile in Supabase
-      const updateData = {
-        display_name: formData.display_name,
-        username: formData.username,
+      const updates = {
+        email: formData.email,
+        display_name: formData.display_name.trim(),
         stage: formData.stage,
-        bio: formData.bio,
-        location_city: formData.location_city,
-        location_state: formData.location_state,
-        undergraduate_school: formData.undergraduate_school,
-        medical_school: formData.medical_school,
-        graduation_year: formData.graduation_year,
         updated_at: new Date().toISOString()
       }
 
-      // Remove undefined values
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key as keyof typeof updateData] === undefined) {
-          delete updateData[key as keyof typeof updateData]
-        }
-      })
-
-      const { data: updatedProfile, error } = await supabase
+      const { error } = await supabase
         .from('user_profiles')
-        .update(updateData)
-        .eq('id', user.id)
-        .select()
-        .single()
+        .update(updates)
+        .eq('id', user?.id)
 
       if (error) {
         console.error('Profile update error:', error)
-        setError('Failed to update profile')
-        return
+        setErrors(['Failed to update profile'])
+      } else {
+        setMessage('Profile updated successfully!')
+        await refreshUser()
       }
-
-      // Update local state
-      setProfile(updatedProfile)
-      setEditing(false)
-      
-      // Refresh the auth context to get the updated user data
-      await refreshUser()
     } catch (error) {
-      console.error('Failed to save profile:', error)
-      setError('Failed to save profile')
+      console.error('Profile update error:', error)
+      setErrors(['An unexpected error occurred'])
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const getStageLabel = (stage: string) => {
-    const stageData = medicalStages.find(s => s.value === stage)
-    return stageData ? `${stageData.emoji} ${stageData.label}` : stage
-  }
-
-  if (authLoading || loading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-red mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your profile...</p>
-          </div>
+        <div className="flex items-center justify-center pt-16">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-red"></div>
         </div>
       </div>
     )
   }
 
   if (!user) {
-    return null // Will redirect
+    return null
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+      <div className="max-w-2xl mx-auto pt-8 pb-16 px-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-16 h-16 bg-brand-red rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              {user.display_name ? user.display_name[0].toUpperCase() : user.email[0].toUpperCase()}
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-              <p className="text-gray-600 mt-1">Manage your public profile and account settings</p>
+              <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
+              <p className="text-gray-600">Manage your MedAtlas account</p>
             </div>
-            {!editing ? (
-              <button
-                onClick={() => setEditing(true)}
-                className="btn-red"
+          </div>
+
+          {/* Status Messages */}
+          {message && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+              <p className="text-green-700">{message}</p>
+            </div>
+          )}
+
+          {errors.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              {errors.map((error, index) => (
+                <p key={index} className="text-red-700">{error}</p>
+              ))}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50"
+                disabled
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Email cannot be changed. Contact support if needed.
+              </p>
+            </div>
+
+            {/* Display Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Display Name
+              </label>
+              <input
+                type="text"
+                value={formData.display_name}
+                onChange={(e) => handleInputChange('display_name', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
+                placeholder="How should others see your name?"
+                required
+              />
+            </div>
+
+            {/* Stage */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Current Stage
+              </label>
+              <select
+                value={formData.stage}
+                onChange={(e) => handleInputChange('stage', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
               >
-                Edit Profile
-              </button>
-            ) : (
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => {
-                    setEditing(false)
-                    setFormData(profile || {})
-                    setError('')
-                  }}
-                  className="btn-outline"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="btn-red disabled:opacity-50"
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-red-700 text-sm">{error}</p>
+                {medicalStages.map(stage => (
+                  <option key={stage.value} value={stage.value}>
+                    {stage.emoji} {stage.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
 
-          {profile && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Info */}
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Basic Information</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Display Name</label>
-                    {editing ? (
-                      <input
-                        type="text"
-                        value={formData.display_name || ''}
-                        onChange={(e) => handleInputChange('display_name', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                        placeholder="How should others see your name?"
-                      />
-                    ) : (
-                      <p className="text-gray-900">{profile.display_name || 'Not set'}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Username</label>
-                    {editing ? (
-                      <input
-                        type="text"
-                        value={formData.username || ''}
-                        onChange={(e) => handleInputChange('username', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                        placeholder="Choose a unique username"
-                      />
-                    ) : (
-                      <p className="text-gray-900">@{profile.username || 'not-set'}</p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-1">
-                      This will be your public URL: medatlas.com/user/{formData.username || profile.username || 'username'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Stage</label>
-                    {editing ? (
-                      <select
-                        value={formData.stage || ''}
-                        onChange={(e) => handleInputChange('stage', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                      >
-                        {medicalStages.map(stage => (
-                          <option key={stage.value} value={stage.value}>
-                            {stage.emoji} {stage.label}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <p className="text-gray-900">{getStageLabel(profile.stage)}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Location</label>
-                    {editing ? (
-                      <div className="flex space-x-2">
-                        <input
-                          type="text"
-                          value={formData.location_city || ''}
-                          onChange={(e) => handleInputChange('location_city', e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                          placeholder="City"
-                        />
-                        <input
-                          type="text"
-                          value={formData.location_state || ''}
-                          onChange={(e) => handleInputChange('location_state', e.target.value)}
-                          className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                          placeholder="State"
-                        />
-                      </div>
-                    ) : (
-                      <p className="text-gray-900">
-                        {profile.location_city && profile.location_state 
-                          ? `${profile.location_city}, ${profile.location_state}` 
-                          : 'Not set'
-                        }
-                      </p>
-                    )}
-                  </div>
-                </div>
+            {/* Account Status */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-medium text-gray-900 mb-2">Account Status</h3>
+              <div className="flex items-center space-x-2">
+                <span className={`px-2 py-1 rounded text-sm font-medium ${
+                  user.is_paid 
+                    ? 'bg-yellow-100 text-yellow-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {user.is_paid ? '⭐ MedAtlas Pro' : '🆓 Free Account'}
+                </span>
               </div>
-
-              {/* Education */}
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Education</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-medium">Undergraduate School</label>
-                      {editing && (
-                        <button
-                          type="button"
-                          onClick={() => setShowUndergraduateSuggestion(!showUndergraduateSuggestion)}
-                          className="text-xs text-blue-600 hover:text-blue-800 underline"
-                        >
-                          {showUndergraduateSuggestion ? 'Hide' : 'Suggest School'}
-                        </button>
-                      )}
-                    </div>
-                    {editing ? (
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          value={formData.undergraduate_school || ''}
-                          onChange={(e) => handleInputChange('undergraduate_school', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                          placeholder="University name"
-                        />
-                        {showUndergraduateSuggestion && (
-                          <SchoolSuggestionForm
-                            schoolType="undergraduate"
-                            onSuccess={() => setShowUndergraduateSuggestion(false)}
-                            onCancel={() => setShowUndergraduateSuggestion(false)}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-gray-900">{profile.undergraduate_school || 'Not set'}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-medium">Medical School</label>
-                      {editing && (
-                        <button
-                          type="button"
-                          onClick={() => setShowMedicalSuggestion(!showMedicalSuggestion)}
-                          className="text-xs text-blue-600 hover:text-blue-800 underline"
-                        >
-                          {showMedicalSuggestion ? 'Hide' : 'Suggest School'}
-                        </button>
-                      )}
-                    </div>
-                    {editing ? (
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          value={formData.medical_school || ''}
-                          onChange={(e) => handleInputChange('medical_school', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                          placeholder="Medical school name"
-                        />
-                        {showMedicalSuggestion && (
-                          <SchoolSuggestionForm
-                            schoolType="medical"
-                            onSuccess={() => setShowMedicalSuggestion(false)}
-                            onCancel={() => setShowMedicalSuggestion(false)}
-                          />
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-gray-900">{profile.medical_school || 'Not set'}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Expected Graduation Year</label>
-                    {editing ? (
-                      <input
-                        type="number"
-                        value={formData.graduation_year || ''}
-                        onChange={(e) => handleInputChange('graduation_year', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                        placeholder="2025"
-                        min="2020"
-                        max="2040"
-                      />
-                    ) : (
-                      <p className="text-gray-900">{profile.graduation_year || 'Not set'}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bio */}
-              <div className="md:col-span-2">
-                <h3 className="text-lg font-semibold mb-3">About</h3>
-                {editing ? (
-                  <textarea
-                    value={formData.bio || ''}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent"
-                    rows={4}
-                    placeholder="Tell others about yourself, your interests, career goals, etc."
-                  />
-                ) : (
-                  <p className="text-gray-900 leading-relaxed">
-                    {profile.bio || 'No bio added yet. Click "Edit Profile" to add a description about yourself.'}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Public Profile Link */}
-        {profile && profile.username && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center space-x-2">
-              <span className="text-blue-600">🌐</span>
-              <div>
-                <p className="font-medium text-blue-800">Your Public Profile</p>
-                <p className="text-blue-700 text-sm">
-                  Others can view your profile at: 
-                  <a 
-                    href={`/user/${profile.username}`}
-                    className="ml-1 underline hover:no-underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    medatlas.com/user/{profile.username}
-                  </a>
+              {!user.is_paid && (
+                <p className="text-sm text-gray-600 mt-2">
+                  Upgrade to Pro for full access to all medical school reviews and features.
                 </p>
-              </div>
+              )}
             </div>
-          </div>
-        )}
+
+            {/* Submit Button */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2 bg-brand-red text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

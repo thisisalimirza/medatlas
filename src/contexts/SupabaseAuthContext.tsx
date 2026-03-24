@@ -7,17 +7,12 @@ import { User as SupabaseUser, Session } from '@supabase/supabase-js'
 interface UserProfile {
   id: string
   email: string
-  username: string
   display_name: string
   stage: string
-  bio: string
-  location_city: string
-  location_state: string
-  undergraduate_school: string
-  medical_school: string
-  graduation_year: number
+  avatar_url: string
   is_paid: boolean
   created_at: string
+  updated_at: string
 }
 
 interface AuthContextType {
@@ -48,6 +43,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (error) {
           console.error('Error getting session:', error)
+          setSession(null)
+          setUser(null)
           setLoading(false)
           return
         }
@@ -56,23 +53,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           await loadUserProfile(session.user)
         } else {
+          setUser(null)
           setLoading(false)
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
         if (mounted) {
+          setSession(null)
+          setUser(null)
           setLoading(false)
         }
       }
     }
 
-    // Add a timeout to prevent infinite loading
+    // Add a timeout to prevent infinite loading - reduced to 5 seconds
     const timeoutId = setTimeout(() => {
       if (mounted && loading) {
         console.warn('Auth initialization timeout, setting loading to false')
         setLoading(false)
       }
-    }, 10000) // 10 second timeout
+    }, 5000) // 5 second timeout
 
     initializeAuth()
 
@@ -100,26 +100,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Periodically check auth state to catch any issues
+  // Simplified periodic check - only run if there's a clear mismatch
   useEffect(() => {
+    if (loading) return // Don't interfere during initialization
+    
     const checkAuthPeriodically = setInterval(async () => {
       // Only check if we think we have a user but no session, or vice versa
       if ((user && !session) || (!user && session)) {
         console.log('Auth state mismatch detected, attempting recovery...')
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
-        if (currentSession && currentSession.user && !user) {
-          console.log('Recovering user from session...')
-          await loadUserProfile(currentSession.user)
-        } else if (!currentSession && user) {
-          console.log('Session lost, clearing user...')
-          setUser(null)
-          setSession(null)
+        try {
+          const { data: { session: currentSession } } = await supabase.auth.getSession()
+          if (currentSession && currentSession.user && !user) {
+            console.log('Recovering user from session...')
+            await loadUserProfile(currentSession.user)
+          } else if (!currentSession && user) {
+            console.log('Session lost, clearing user...')
+            setUser(null)
+            setSession(null)
+          }
+        } catch (error) {
+          console.error('Error during auth recovery:', error)
         }
       }
-    }, 30000) // Check every 30 seconds
+    }, 60000) // Check every 60 seconds - less frequent
 
     return () => clearInterval(checkAuthPeriodically)
-  }, [user, session])
+  }, [user, session, loading])
 
   const loadUserProfile = async (authUser: SupabaseUser, retryCount = 0) => {
     try {
@@ -141,15 +147,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .insert({
                 id: authUser.id,
                 email: authUser.email || '',
-                username: authUser.email?.split('@')[0] || '',
                 display_name: authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || '',
                 stage: authUser.user_metadata?.stage || 'premed',
-                bio: '',
-                location_city: '',
-                location_state: '',
-                undergraduate_school: '',
-                medical_school: '',
-                graduation_year: 0,
                 is_paid: false
               })
               .select()
@@ -159,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error('Error creating profile:', createError)
               setUser(null)
             } else {
+              console.log('Successfully created profile:', newProfile)
               setUser(newProfile)
             }
           } catch (createError) {
@@ -169,6 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
         }
       } else {
+        console.log('Successfully loaded profile:', profile)
         setUser(profile)
       }
     } catch (error) {

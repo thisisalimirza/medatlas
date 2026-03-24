@@ -17,22 +17,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup')
   const { user, logout, loading, refreshUser } = useAuth()
 
-  // Recovery mechanism for stuck auth states
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout
-
-    // If we've been loading for more than 5 seconds, try to recover
-    if (loading) {
-      timeoutId = setTimeout(() => {
-        console.log('Header: Auth stuck in loading state, attempting recovery...')
-        refreshUser()
-      }, 5000)
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId)
-    }
-  }, [loading, refreshUser])
+  // Auth loading should resolve automatically now with improved context
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
