@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email } = body
+    const { email, stage } = body
 
     // Validation
     if (!email) {
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: 'MedAtlas Lifetime Access',
               description: 'Get full access to the MedAtlas platform — explore medical schools, residencies, student reviews, and exclusive community features.',
-              images: ['https://medatlas.com/pro-icon.png'], // You can add this later
+              images: [`${baseUrl}/logo.png`],
             },
             unit_amount: parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900'), // Default $99 if not set
           },
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
       cancel_url: cancelUrl,
       metadata: {
         email,
+        stage: stage || 'premed',
         product: 'medatlas-pro'
       },
       allow_promotion_codes: true,

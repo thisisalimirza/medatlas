@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useAuth } from '@/contexts/SupabaseAuthContext'
 import Header from '@/components/Header'
 
 interface Interview {
@@ -34,6 +35,7 @@ const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','
 function generateId() { return Math.random().toString(36).substring(2, 9) }
 
 export default function InterviewTrackerPage() {
+  const { user } = useAuth()
   const [interviews, setInterviews] = useState<Interview[]>([])
   const [showForm, setShowForm] = useState(false)
   const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null)
@@ -42,6 +44,31 @@ export default function InterviewTrackerPage() {
     programName: '', specialty: 'Internal Medicine', city: '', state: 'NY',
     date: '', format: 'virtual' as Interview['format'], notes: ''
   })
+  const [aiSpecialty, setAiSpecialty] = useState('Internal Medicine')
+  const [aiQuestionType, setAiQuestionType] = useState('mixed')
+  const [aiQuestions, setAiQuestions] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+
+  const generateQuestions = async () => {
+    setAiLoading(true)
+    setAiError('')
+    setAiQuestions('')
+    try {
+      const res = await fetch('/api/ai/interview-prep', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ specialty: aiSpecialty, questionType: aiQuestionType, userEmail: user?.email })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Generation failed')
+      setAiQuestions(data.questions)
+    } catch (err: unknown) {
+      setAiError(err instanceof Error ? err.message : 'Failed to generate questions.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const addInterview = () => {
     if (!newInterview.programName) return
@@ -343,6 +370,59 @@ export default function InterviewTrackerPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* AI Interview Prep Section */}
+        {user?.is_paid && (
+          <div className="mt-12 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xl">✨</span>
+              <h2 className="text-lg font-bold text-gray-900">AI Mock Interview Questions</h2>
+              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">Generate specialty-specific practice questions with tips on how to answer them.</p>
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <select value={aiSpecialty} onChange={e => setAiSpecialty(e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                {SPECIALTIES.filter(s => s !== 'Other').map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select value={aiQuestionType} onChange={e => setAiQuestionType(e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option value="mixed">Mixed Questions</option>
+                <option value="behavioral">Behavioral</option>
+                <option value="clinical">Clinical Scenarios</option>
+                <option value="program">Why This Specialty</option>
+              </select>
+              <button
+                onClick={generateQuestions}
+                disabled={aiLoading}
+                className={`px-5 py-2 rounded-lg font-medium text-sm transition-all ${
+                  aiLoading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'
+                }`}
+              >
+                {aiLoading ? 'Generating...' : 'Generate Questions'}
+              </button>
+            </div>
+            {aiError && <p className="text-sm text-red-600 mb-3">{aiError}</p>}
+            {aiLoading && (
+              <div className="py-6 text-center">
+                <div className="animate-spin w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full mx-auto mb-2" />
+                <p className="text-sm text-gray-500">Generating practice questions...</p>
+              </div>
+            )}
+            {aiQuestions && (
+              <pre className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed font-sans bg-gray-50 rounded-lg p-4 mt-2">{aiQuestions}</pre>
+            )}
+          </div>
+        )}
+
+        {!user?.is_paid && (
+          <div className="mt-12 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border border-red-200 p-6 text-center">
+            <span className="text-2xl">✨</span>
+            <h3 className="font-bold text-gray-900 mt-2">AI Mock Interview Questions</h3>
+            <p className="text-sm text-gray-600 mt-1 mb-3">Generate specialty-specific practice questions with AI. Available for Pro members.</p>
+            <button onClick={() => window.location.href = '/'} className="bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+              Upgrade to Pro — $99 Lifetime
+            </button>
           </div>
         )}
 

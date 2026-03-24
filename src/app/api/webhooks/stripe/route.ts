@@ -34,10 +34,10 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
-        const { email, stage } = paymentIntent.metadata || {}
-        
-        if (!email || !stage) {
-          console.error('Missing metadata in payment intent:', paymentIntent.id)
+        const { email } = paymentIntent.metadata || {}
+
+        if (!email) {
+          console.error('Missing email in payment intent metadata:', paymentIntent.id)
           break
         }
 
@@ -85,10 +85,10 @@ export async function POST(request: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session
         
         if (session.payment_status === 'paid') {
-          const { email, stage } = session.metadata || {}
-          
-          if (!email || !stage) {
-            console.error('Missing metadata in checkout session:', session.id)
+          const { email } = session.metadata || {}
+
+          if (!email) {
+            console.error('Missing email in checkout session metadata:', session.id)
             break
           }
 
