@@ -5,12 +5,24 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
   apiVersion: '2025-07-30.basil',
 })
 
+const PLANS: Record<string, { name: string; description: string; cents: number }> = {
+  'annual': {
+    name: 'MedAtlas Pro — Annual',
+    description: 'Full access to MedAtlas for 1 year. Reviews, community, tools, and more.',
+    cents: 6000, // $60/yr
+  },
+  '5year': {
+    name: 'MedAtlas Pro — 5-Year Access',
+    description: 'Full access to MedAtlas for your entire medical journey (5 years). Best value — just $20/yr.',
+    cents: 10000, // $100 total
+  },
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, stage } = body
+    const { email, stage, plan = '5year' } = body
 
-    // Validation
     if (!email) {
       return NextResponse.json(
         { success: false, error: 'Email is required' },
@@ -26,14 +38,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine the base URL for redirects
+    const selectedPlan = PLANS[plan] || PLANS['5year']
+
     const baseUrl = process.env.NEXT_PUBLIC_URL || request.headers.get('origin') || 'http://localhost:3000'
     const successUrl = `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${baseUrl}/?canceled=true`
-    
-    console.log('Creating checkout session with URLs:', { successUrl, cancelUrl })
 
-    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer_email: email,
       payment_method_types: ['card'],
@@ -42,11 +52,11 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'MedAtlas Lifetime Access',
-              description: 'Get full access to the MedAtlas platform — explore medical schools, residencies, student reviews, and exclusive community features.',
+              name: selectedPlan.name,
+              description: selectedPlan.description,
               images: [`${baseUrl}/logo.png`],
             },
-            unit_amount: parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900'), // Default $99 if not set
+            unit_amount: selectedPlan.cents,
           },
           quantity: 1,
         },
@@ -57,22 +67,16 @@ export async function POST(request: NextRequest) {
       metadata: {
         email,
         stage: stage || 'premed',
-        product: 'medatlas-pro'
+        product: 'medatlas-pro',
+        plan,
       },
       allow_promotion_codes: true,
-    })
-
-    console.log('Checkout session created:', {
-      sessionId: session.id,
-      url: session.url,
-      successUrl: session.success_url,
-      cancelUrl: session.cancel_url
     })
 
     return NextResponse.json({
       success: true,
       checkout_url: session.url,
-      session_id: session.id // Add for debugging
+      session_id: session.id,
     })
   } catch (error) {
     console.error('Stripe checkout error:', error)

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { User as SupabaseUser, Session } from '@supabase/supabase-js'
 
@@ -30,104 +30,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const mountedRef = useRef(true)
+  const profileCacheRef = useRef<Record<string, UserProfile>>({})
 
-  useEffect(() => {
-    let mounted = true
-
-    // Get initial session with better error handling
-    const initializeAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        
-        if (!mounted) return
-        
-        if (error) {
-          console.error('Error getting session:', error)
-          setSession(null)
-          setUser(null)
-          setLoading(false)
-          return
-        }
-
-        setSession(session)
-        if (session?.user) {
-          await loadUserProfile(session.user)
-        } else {
-          setUser(null)
-          setLoading(false)
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error)
-        if (mounted) {
-          setSession(null)
-          setUser(null)
-          setLoading(false)
-        }
-      }
+  const loadUserProfile = useCallback(async (authUser: SupabaseUser, retryCount = 0) => {
+    // Check cache first to avoid redundant fetches
+    const cached = profileCacheRef.current[authUser.id]
+    if (cached && retryCount === 0) {
+      setUser(cached)
+      setLoading(false)
+      return
     }
 
-    // Add a timeout to prevent infinite loading - reduced to 5 seconds
-    const timeoutId = setTimeout(() => {
-      if (mounted && loading) {
-        console.warn('Auth initialization timeout, setting loading to false')
-        setLoading(false)
-      }
-    }, 5000) // 5 second timeout
-
-    initializeAuth()
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return
-
-      console.log('Auth state change:', event, session?.user?.email)
-      setSession(session)
-      
-      if (session?.user) {
-        await loadUserProfile(session.user)
-      } else {
-        setUser(null)
-        setLoading(false)
-      }
-    })
-
-    return () => {
-      mounted = false
-      clearTimeout(timeoutId)
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  // Simplified periodic check - only run if there's a clear mismatch
-  useEffect(() => {
-    if (loading) return // Don't interfere during initialization
-    
-    const checkAuthPeriodically = setInterval(async () => {
-      // Only check if we think we have a user but no session, or vice versa
-      if ((user && !session) || (!user && session)) {
-        console.log('Auth state mismatch detected, attempting recovery...')
-        try {
-          const { data: { session: currentSession } } = await supabase.auth.getSession()
-          if (currentSession && currentSession.user && !user) {
-            console.log('Recovering user from session...')
-            await loadUserProfile(currentSession.user)
-          } else if (!currentSession && user) {
-            console.log('Session lost, clearing user...')
-            setUser(null)
-            setSession(null)
-          }
-        } catch (error) {
-          console.error('Error during auth recovery:', error)
-        }
-      }
-    }, 60000) // Check every 60 seconds - less frequent
-
-    return () => clearInterval(checkAuthPeriodically)
-  }, [user, session, loading])
-
-  const loadUserProfile = async (authUser: SupabaseUser, retryCount = 0) => {
     try {
       const { data: profile, error } = await supabase
         .from('user_profiles')
@@ -135,50 +49,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', authUser.id)
         .single()
 
-      if (error) {
-        console.error('Error loading user profile:', error)
-        
-        // If profile doesn't exist, try to create it
-        if (error.code === 'PGRST116' && retryCount === 0) {
-          console.log('Profile not found, attempting to create...')
-          try {
-            const { data: newProfile, error: createError } = await supabase
-              .from('user_profiles')
-              .insert({
-                id: authUser.id,
-                email: authUser.email || '',
-                display_name: authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || '',
-                stage: authUser.user_metadata?.stage || 'premed',
-                is_paid: false
-              })
-              .select()
-              .single()
+      if (!mountedRef.current) return
 
-            if (createError) {
-              console.error('Error creating profile:', createError)
-              setUser(null)
-            } else {
-              console.log('Successfully created profile:', newProfile)
-              setUser(newProfile)
-            }
-          } catch (createError) {
-            console.error('Error creating profile:', createError)
+      if (error) {
+        // Profile doesn't exist yet — create it (e.g. first login after payment)
+        if (error.code === 'PGRST116' && retryCount < 2) {
+          console.log('Profile not found, creating...')
+          const { data: newProfile, error: createError } = await supabase
+            .from('user_profiles')
+            .insert({
+              id: authUser.id,
+              email: authUser.email || '',
+              display_name: authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || '',
+              stage: authUser.user_metadata?.stage || 'premed',
+              is_paid: false
+            })
+            .select()
+            .single()
+
+          if (!mountedRef.current) return
+
+          if (!createError && newProfile) {
+            profileCacheRef.current[authUser.id] = newProfile
+            setUser(newProfile)
+          } else if (retryCount < 1) {
+            // Race condition: profile might have been created by webhook — retry fetch
+            setTimeout(() => loadUserProfile(authUser, retryCount + 1), 1000)
+            return
+          } else {
             setUser(null)
           }
         } else {
+          console.error('Error loading user profile:', error)
           setUser(null)
         }
       } else {
-        console.log('Successfully loaded profile:', profile)
+        profileCacheRef.current[authUser.id] = profile
         setUser(profile)
       }
     } catch (error) {
       console.error('Error loading user profile:', error)
-      setUser(null)
+      if (mountedRef.current) setUser(null)
     } finally {
-      setLoading(false)
+      if (mountedRef.current) setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    mountedRef.current = true
+
+    // Listen for auth changes FIRST — this is the primary mechanism
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (!mountedRef.current) return
+
+      console.log('Auth event:', event)
+      setSession(newSession)
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        profileCacheRef.current = {}
+        setLoading(false)
+        return
+      }
+
+      if (newSession?.user) {
+        // Force fresh profile load on sign-in (cache might be stale after payment)
+        if (event === 'SIGNED_IN') {
+          delete profileCacheRef.current[newSession.user.id]
+        }
+        await loadUserProfile(newSession.user)
+      } else {
+        setUser(null)
+        setLoading(false)
+      }
+    })
+
+    // Then get the initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
+      if (!mountedRef.current) return
+      if (error) {
+        console.error('Error getting initial session:', error)
+        setLoading(false)
+        return
+      }
+      // Only set if onAuthStateChange hasn't already fired
+      if (!session && initialSession?.user) {
+        setSession(initialSession)
+        loadUserProfile(initialSession.user)
+      } else if (!initialSession) {
+        setLoading(false)
+      }
+    })
+
+    // Safety timeout
+    const timeoutId = setTimeout(() => {
+      if (mountedRef.current && loading) {
+        console.warn('Auth init timeout')
+        setLoading(false)
+      }
+    }, 6000)
+
+    return () => {
+      mountedRef.current = false
+      clearTimeout(timeoutId)
+      subscription.unsubscribe()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendMagicLink = async (email: string, stage?: string, displayName?: string) => {
     try {
@@ -214,30 +192,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
-      // First try to refresh the session
-      const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession()
-      
-      if (error) {
-        console.error('Error refreshing session:', error)
-        // Fallback to getting current session
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
-        if (currentSession?.user) {
-          await loadUserProfile(currentSession.user)
-        }
-      } else if (refreshedSession?.user) {
-        setSession(refreshedSession)
-        await loadUserProfile(refreshedSession.user)
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+      if (currentSession?.user) {
+        // Invalidate cache so we get fresh profile data
+        delete profileCacheRef.current[currentSession.user.id]
+        setSession(currentSession)
+        await loadUserProfile(currentSession.user, 1) // skip cache
       }
     } catch (error) {
       console.error('Error in refreshUser:', error)
-      // Last resort - check if we have a session
-      if (session?.user) {
-        await loadUserProfile(session.user)
-      }
     }
-  }
+  }, [loadUserProfile])
 
   return (
     <AuthContext.Provider value={{

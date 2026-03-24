@@ -28,16 +28,16 @@ export default function Error({
           </p>
           
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={reset}
-                className="bg-brand-red text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                className="inline-flex items-center justify-center bg-brand-red text-white px-6 py-3 rounded-xl hover:bg-red-700 transition-all duration-200 font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5"
               >
                 🔄 Try Again
               </button>
               <button
                 onClick={() => window.location.href = '/'}
-                className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center justify-center bg-white text-gray-700 px-6 py-3 rounded-xl border-2 border-gray-300 hover:border-brand-red hover:text-brand-red transition-all duration-200 font-medium shadow-sm hover:shadow-md hover:-translate-y-0.5"
               >
                 🏠 Go Home
               </button>

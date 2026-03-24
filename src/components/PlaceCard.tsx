@@ -62,9 +62,10 @@ export default function PlaceCard({ place, onClick }: PlaceCardProps) {
   const sampleImage = getSampleImage(place.name)
   
   // Check if photo_url is a valid, non-placeholder URL
-  const isValidPhotoUrl = place.photo_url && 
-    !place.photo_url.includes('example.com') && 
+  const isValidPhotoUrl = place.photo_url &&
+    !place.photo_url.includes('example.com') &&
     !place.photo_url.includes('placeholder') &&
+    !place.photo_url.includes('placehold.co') &&
     place.photo_url.startsWith('http')
   
   const imageUrl = isValidPhotoUrl ? place.photo_url! : sampleImage.url
@@ -135,7 +136,7 @@ export default function PlaceCard({ place, onClick }: PlaceCardProps) {
             </div>
           </div>
           
-          <div className="text-right">
+          <div className="text-right" title="In-state tuition per year">
             <div className="text-lg font-bold text-brand-red">
               {formatTuition(place.metrics.tuition || 0)}
             </div>
@@ -150,7 +151,7 @@ export default function PlaceCard({ place, onClick }: PlaceCardProps) {
           <div className="flex items-center space-x-3">
             <span>📍 {place.institution}</span>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1" title="Estimated monthly cost of living including rent, food, and transport">
             <span>COL:</span>
             <span className="font-medium">${Math.round(place.metrics.col_index || 0)}/mo</span>
           </div>

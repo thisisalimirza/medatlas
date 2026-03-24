@@ -125,46 +125,70 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
 
                   {/* Dropdown Menu - click-toggled */}
                   {isUserMenuOpen && (
-                  <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
-                    <div className="p-3 border-b border-gray-100">
-                      <div className="text-sm font-medium text-gray-900 truncate">
-                        {user.display_name || user.email}
-                      </div>
-                      <div className="text-xs text-gray-500 capitalize flex items-center">
-                        {user.stage}{user.is_paid && <span className="ml-1 text-yellow-500">⭐</span>}
+                  <div className="absolute right-0 top-12 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+                    {/* User info header */}
+                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-brand-red rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                          {user.display_name ? user.display_name[0].toUpperCase() : user.email[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-gray-900 truncate">
+                            {user.display_name || user.email.split('@')[0]}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">{user.email}</div>
+                          <div className="flex items-center mt-0.5">
+                            <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                              user.is_paid
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {user.is_paid ? '⭐ Pro' : 'Free'} · {user.stage?.toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="py-1">
-                      <a href="/profile" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
-                        <span className="mr-3 group-hover:scale-110 transition-transform">👤</span>
+
+                    {/* Navigation items */}
+                    <div className="py-1.5">
+                      <a href="/profile" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-150">
+                        <span className="mr-3 w-5 text-center">👤</span>
                         My Profile
                       </a>
-                      <a href="/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
-                        <span className="mr-3 group-hover:scale-110 transition-transform">📊</span>
+                      <a href="/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-150">
+                        <span className="mr-3 w-5 text-center">📊</span>
                         Dashboard
                       </a>
-                      <a href="/favorites" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
-                        <span className="mr-3 group-hover:scale-110 transition-transform">❤️</span>
+                      <a href="/favorites" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-150">
+                        <span className="mr-3 w-5 text-center">❤️</span>
                         Favorites
                       </a>
-                      {!user.is_paid && (
-                        <button 
+                    </div>
+
+                    {/* Upgrade CTA or Pro badge */}
+                    {!user.is_paid && (
+                      <div className="px-3 py-2 border-t border-gray-100">
+                        <button
                           onClick={() => {
+                            setIsUserMenuOpen(false)
                             setAuthModalMode('signup')
                             setIsAuthModalOpen(true)
                           }}
-                          className="flex items-center w-full px-4 py-2 text-sm text-brand-red hover:bg-red-50 hover:text-red-700 transition-all duration-200 group"
+                          className="flex items-center justify-center w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-brand-red to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-sm"
                         >
-                          <span className="mr-3 group-hover:scale-110 transition-transform">⭐</span>
-                          Upgrade to Pro
+                          ⭐ Upgrade to Pro
                         </button>
-                      )}
-                      <div className="border-t border-gray-100 my-1"></div>
+                      </div>
+                    )}
+
+                    {/* Sign out */}
+                    <div className="border-t border-gray-100">
                       <button
-                        onClick={logout}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 group"
+                        onClick={() => { setIsUserMenuOpen(false); logout() }}
+                        className="flex items-center w-full px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-150"
                       >
-                        <span className="mr-3 group-hover:scale-110 transition-transform">🚪</span>
+                        <span className="mr-3 w-5 text-center">🚪</span>
                         Sign Out
                       </button>
                     </div>

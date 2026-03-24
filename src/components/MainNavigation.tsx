@@ -177,10 +177,10 @@ export default function MainNavigation() {
           />
         </div>
         {/* Hamburger icon to signal this is a menu */}
-        <div className="flex flex-col justify-center space-y-1">
-          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-200 ${isOpen ? 'rotate-45 translate-y-[3px]' : ''}`} />
-          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-200 ${isOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-200 ${isOpen ? '-rotate-45 -translate-y-[3px]' : ''}`} />
+        <div className="flex flex-col justify-center space-y-[5px]">
+          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-300 origin-center ${isOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-300 ${isOpen ? 'opacity-0 scale-0' : ''}`} />
+          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-300 origin-center ${isOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
         </div>
       </button>
 

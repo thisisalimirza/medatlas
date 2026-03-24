@@ -21,6 +21,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: '/match-stats', changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: '/img-resources', changeFrequency: 'monthly' as const, priority: 0.7 },
     { url: '/faq', changeFrequency: 'monthly' as const, priority: 0.5 },
+    { url: '/rotations', changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: '/clinical-skills', changeFrequency: 'monthly' as const, priority: 0.7 },
+    { url: '/study-groups', changeFrequency: 'monthly' as const, priority: 0.6 },
+    { url: '/mentorship', changeFrequency: 'monthly' as const, priority: 0.6 },
   ]
 
   // Tools pages

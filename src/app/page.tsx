@@ -198,10 +198,10 @@ export default function HomePage() {
       />
       
       <div className="flex relative">
-        {/* Mobile Sidebar Overlay */}
+        {/* Sidebar Overlay — click to close on all screen sizes */}
         {isFiltersSidebarOpen && (
           <div
-            className="md:hidden fixed inset-0 top-14 bg-black/50 z-30"
+            className="fixed inset-0 top-14 sm:top-16 bg-black/30 z-20 md:bg-transparent md:pointer-events-none"
             onClick={() => setIsFiltersSidebarOpen(false)}
           />
         )}

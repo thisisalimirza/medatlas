@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-red: #ff5e5b;
+  --color-brand-red-hover: #e04e4b;
+}
+
 @layer base {
   body {
     font-family: system-ui, sans-serif;
@@ -80,6 +85,8 @@
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     animation: slideIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
   }
 
   @keyframes fadeIn {

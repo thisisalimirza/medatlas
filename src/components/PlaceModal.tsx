@@ -64,9 +64,10 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
   const sampleImage = getSampleImage(place?.name || '')
   
   // Check if photo_url is a valid, non-placeholder URL
-  const isValidPhotoUrl = place?.photo_url && 
-    !place.photo_url.includes('example.com') && 
+  const isValidPhotoUrl = place?.photo_url &&
+    !place.photo_url.includes('example.com') &&
     !place.photo_url.includes('placeholder') &&
+    !place.photo_url.includes('placehold.co') &&
     place.photo_url.startsWith('http')
   
   const imageUrl = isValidPhotoUrl ? place.photo_url! : sampleImage.url
@@ -285,28 +286,33 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
 
             {/* Individual Scores */}
             <div className="space-y-6">
-              {renderScoreBar('Quality of Training', place.scores.quality_of_training, '🎓', 'Clinical education and academic reputation')}
-              {renderScoreBar('Match Strength', place.scores.match_strength, '🎯', 'Residency match success rate and outcomes')}
-              {renderScoreBar('Community Score', place.scores.community_score, '👥', 'Student support and collaborative environment')}
-              {renderScoreBar('Lifestyle Balance', place.scores.lifestyle, '⚖️', 'Work-life balance and student wellbeing')}
-              {renderScoreBar('Low Burnout', 10 - place.scores.burnout, '🧘', 'Stress management and mental health support')}
+              {renderScoreBar('Quality of Training', place.scores.quality_of_training, '🎓', 'Rated by graduates on clinical exposure, faculty mentorship, and board prep (AAMC & student surveys)')}
+              {renderScoreBar('Match Strength', place.scores.match_strength, '🎯', 'Based on NRMP match rates and placement into preferred specialties')}
+              {renderScoreBar('Community Score', place.scores.community_score, '👥', 'Student-reported ratings on peer support, collaboration, and admin responsiveness')}
+              {renderScoreBar('Lifestyle Balance', place.scores.lifestyle, '⚖️', 'Reflects schedule flexibility, location amenities, and student satisfaction surveys')}
+              {renderScoreBar('Low Burnout', 10 - place.scores.burnout, '🧘', 'Inverse of reported burnout — higher means better mental health support and workload balance')}
             </div>
 
             {/* Quick Info Card */}
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="bg-gray-50 rounded-lg p-4 text-center" title="In-state tuition per academic year (source: AAMC)">
                 <div className="text-2xl font-bold text-brand-red">{(place.metrics.tuition || 0) === 0 ? 'Free' : `$${Math.round((place.metrics.tuition || 0) / 1000)}K`}</div>
                 <div className="text-sm text-gray-600">Annual Tuition</div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="bg-gray-50 rounded-lg p-4 text-center" title="Estimated monthly cost of living including rent, food, and transport">
                 <div className="text-2xl font-bold text-brand-red">${Math.round(place.metrics.col_index || 0)}</div>
                 <div className="text-sm text-gray-600">Cost of Living (monthly)</div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
+              <div className="bg-gray-50 rounded-lg p-4 text-center" title="Composite ranking based on training quality, match rates, and student satisfaction">
                 <div className="text-2xl font-bold text-brand-red">#{place.rank_overall ? Math.round(place.rank_overall * 10) : '?'}</div>
                 <div className="text-sm text-gray-600">National Ranking</div>
               </div>
             </div>
+
+            {/* Data Source Attribution */}
+            <p className="text-xs text-gray-400 mt-6 text-center">
+              Data sourced from AAMC, NRMP, and student-reported surveys. Scores are community-weighted averages.
+            </p>
           </div>
         )
 
@@ -830,11 +836,11 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* Header - Cleaner, nomad-style */}
-        <div className="sticky top-0 bg-white border-b border-gray-200">
+      <div className="modal-content flex flex-col" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-200">
           {/* Image Section */}
-          <div className="relative h-48 bg-gray-200 overflow-hidden">
+          <div className="relative h-40 sm:h-48 bg-gray-200 overflow-hidden">
             <Image
               src={imageUrl}
               alt={place.name}
@@ -945,8 +951,8 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
           </div>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto max-h-[60vh] overscroll-contain">
+        {/* Content — fills remaining space in the flex column */}
+        <div className="flex-1 overflow-y-auto overscroll-contain min-h-0">
           {renderTabContent()}
         </div>
       </div>

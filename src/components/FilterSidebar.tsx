@@ -57,6 +57,7 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
   const filterSections = [
     {
       title: 'COMPETITIVENESS',
+      description: 'Filter by admissions stats and match outcomes',
       filters: [
         {
           type: 'chips',
@@ -86,6 +87,7 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
     },
     {
       title: 'COST & ACCESSIBILITY',
+      description: 'Narrow by tuition, financial aid, and IMG status',
       filters: [
         {
           type: 'chips',
@@ -107,6 +109,7 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
     },
     {
       title: 'LOCATION & TYPE',
+      description: 'Find schools by region, setting, or institution type',
       filters: [
         {
           type: 'chips',
@@ -145,6 +148,7 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
     },
     {
       title: 'SPECIALIZATION',
+      description: 'Highlight programs with specific strengths',
       filters: [
         {
           type: 'toggle',
@@ -175,6 +179,8 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
     }
   ]
 
+  const activeFilterCount = Object.values(currentFilters).filter(v => v !== null && v !== undefined && v !== false).length
+
   return (
     <div className="w-[85vw] max-w-80 md:w-80 bg-white border-r border-gray-200 h-screen sticky top-0 overflow-y-auto overscroll-contain">
       {/* Filter Header */}
@@ -183,19 +189,26 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
           <h2 className="font-semibold text-gray-900 flex items-center space-x-2">
             <span>🔧</span>
             <span>Filters</span>
+            {activeFilterCount > 0 && (
+              <span className="bg-brand-red text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                {activeFilterCount}
+              </span>
+            )}
           </h2>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => onFiltersChange({})}
-              className="text-xs text-brand-red hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded font-medium transition-all duration-200"
-            >
-              Clear all
-            </button>
-            {/* Close button - visible on mobile */}
+            {activeFilterCount > 0 && (
+              <button
+                onClick={() => onFiltersChange({})}
+                className="text-xs text-brand-red hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded font-medium transition-all duration-200"
+              >
+                Clear all
+              </button>
+            )}
+            {/* Close button - visible on ALL screens */}
             {onClose && (
               <button
                 onClick={onClose}
-                className="md:hidden p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Close filters"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -209,9 +222,14 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
         <div className="space-y-6">
           {filterSections.map((section) => (
             <div key={section.title}>
-              <h3 className="font-medium text-xs text-gray-500 uppercase tracking-wider mb-3 border-b border-gray-100 pb-2">
-                {section.title}
-              </h3>
+              <div className="mb-3 border-b border-gray-100 pb-2">
+                <h3 className="font-medium text-xs text-gray-500 uppercase tracking-wider">
+                  {section.title}
+                </h3>
+                {section.description && (
+                  <p className="text-xs text-gray-400 mt-0.5">{section.description}</p>
+                )}
+              </div>
               
               <div className="space-y-4">
                 {section.filters.map((filter) => (
