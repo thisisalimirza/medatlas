@@ -6,6 +6,17 @@ interface PlaceLayoutProps {
   params: Promise<{ slug: string }>
 }
 
+// Pre-render all 208 place pages at build time for faster indexing
+export async function generateStaticParams() {
+  const { data: places } = await supabaseAdmin
+    .from('places')
+    .select('slug')
+
+  return (places || []).map((place) => ({
+    slug: place.slug,
+  }))
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
 
@@ -75,9 +86,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${place.name} - ${typeLabel} in ${location} | MedStack`,
     description,
     keywords,
+    alternates: {
+      canonical: `https://mymedstack.com/place/${slug}`,
+    },
     openGraph: {
       title: `${place.name} - ${typeLabel} | MedStack`,
       description,
+      url: `https://mymedstack.com/place/${slug}`,
       type: 'website',
       siteName: 'MedStack',
     },
