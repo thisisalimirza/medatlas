@@ -33,13 +33,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const mountedRef = useRef(true)
   const profileCacheRef = useRef<Record<string, UserProfile>>({})
+  const profileLoadingRef = useRef(false)
+  const userLoadedRef = useRef(false)
 
   const loadUserProfile = useCallback(async (authUser: SupabaseUser, retryCount = 0) => {
+    // Prevent duplicate concurrent loads
+    if (profileLoadingRef.current && retryCount === 0) return
+    profileLoadingRef.current = true
+
     // Check cache first to avoid redundant fetches
     const cached = profileCacheRef.current[authUser.id]
     if (cached && retryCount === 0) {
       setUser(cached)
       setLoading(false)
+      profileLoadingRef.current = false
       return
     }
 
@@ -73,6 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!createError && newProfile) {
             profileCacheRef.current[authUser.id] = newProfile
             setUser(newProfile)
+            userLoadedRef.current = true
           } else if (retryCount < 1) {
             // Race condition: profile might have been created by webhook — retry fetch
             setTimeout(() => loadUserProfile(authUser, retryCount + 1), 1000)
@@ -87,11 +95,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         profileCacheRef.current[authUser.id] = profile
         setUser(profile)
+        userLoadedRef.current = true
       }
     } catch (error) {
       console.error('Error loading user profile:', error)
       if (mountedRef.current) setUser(null)
     } finally {
+      profileLoadingRef.current = false
       if (mountedRef.current) setLoading(false)
     }
   }, [])
@@ -111,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event === 'SIGNED_OUT') {
         setUser(null)
         profileCacheRef.current = {}
+        userLoadedRef.current = false
         setLoading(false)
         return
       }
@@ -127,7 +138,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })
 
-    // Then get the initial session
+    // Then get the initial session as a fallback
+    // onAuthStateChange should handle this, but getSession is a safety net
     supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
       if (!mountedRef.current) return
       if (error) {
@@ -135,22 +147,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false)
         return
       }
-      // Only set if onAuthStateChange hasn't already fired
-      if (!session && initialSession?.user) {
-        setSession(initialSession)
+      if (initialSession?.user) {
+        // profileLoadingRef prevents duplicate loads if onAuthStateChange already fired
+        setSession(prev => prev || initialSession)
         loadUserProfile(initialSession.user)
-      } else if (!initialSession) {
+      } else if (!initialSession && !profileLoadingRef.current) {
         setLoading(false)
       }
     })
 
-    // Safety timeout
-    const timeoutId = setTimeout(() => {
-      if (mountedRef.current && loading) {
-        console.warn('Auth init timeout')
-        setLoading(false)
+    // Safety timeout — if profile fetch is slow, fall back to session data
+    const timeoutId = setTimeout(async () => {
+      if (!mountedRef.current || !loading) return
+
+      // Check if we have a valid session even though profile didn't load
+      const { data: { session: fallbackSession } } = await supabase.auth.getSession()
+      if (fallbackSession?.user && !userLoadedRef.current) {
+        console.warn('Auth init timeout — using session data as fallback')
+        const authUser = fallbackSession.user
+        setSession(fallbackSession)
+        setUser({
+          id: authUser.id,
+          email: authUser.email || '',
+          display_name: authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || '',
+          stage: authUser.user_metadata?.stage || 'premed',
+          avatar_url: '',
+          is_paid: false, // Conservative default — will be corrected on next profile load
+          created_at: authUser.created_at || '',
+          updated_at: '',
+        })
+        // Try loading the real profile in the background
+        loadUserProfile(authUser, 1)
+      } else {
+        console.warn('Auth init timeout — no session')
       }
-    }, 6000)
+      setLoading(false)
+    }, 10000)
 
     return () => {
       mountedRef.current = false
