@@ -45,25 +45,23 @@ const navigationData: NavSection[] = [
   {
     label: "Med Student Tools",
     items: [
+      { icon: "🎓", label: "Specialty Explorer", href: "/specialties" },
+      { icon: "📖", label: "Board Exam Prep", href: "/step1-prep" },
+      { icon: "🧾", label: "Rotation Tracker", href: "/rotation-tracker" },
+      { icon: "📊", label: "Grade Tracker", href: "/grades" },
       { icon: "📊", label: "Financial Planner", href: "/tools/financial-planner" },
-      { icon: "🏥", label: "Summer Programs", href: "/tools/summer-programs" },
-      { icon: "📖", label: "Step 1 Prep", href: "/step1-prep", requiresAuth: true, requiresPaid: true },
-      { icon: "🩺", label: "Clinical Skills", href: "/clinical-skills", requiresAuth: true, requiresPaid: true },
-      { icon: "🧾", label: "Rotation Tracker", href: "/rotation-tracker", requiresAuth: true, requiresPaid: true },
-      { icon: "📊", label: "Grade Tracker", href: "/grades", requiresAuth: true, requiresPaid: true },
-      { icon: "🎓", label: "Specialty Explorer", href: "/specialties", requiresAuth: true },
-      { icon: "📱", label: "Study Groups", href: "/study-groups", requiresAuth: true }
+      { icon: "🏥", label: "Summer Programs", href: "/tools/summer-programs" }
     ]
   },
   {
     label: "Residency Tools",
     items: [
-      { icon: "🏥", label: "Program Comparator", href: "/compare", requiresAuth: true, requiresPaid: true },
-      { icon: "📈", label: "Match Analytics", href: "/match-stats", requiresAuth: true, requiresPaid: true },
-      { icon: "📝", label: "Interview Tracker", href: "/interviews", requiresAuth: true, requiresPaid: true },
-      { icon: "🎯", label: "Rank List Builder", href: "/rank-list", requiresAuth: true, requiresPaid: true },
-      { icon: "💼", label: "ERAS Manager", href: "/eras", requiresAuth: true, requiresPaid: true },
-      { icon: "🌍", label: "IMG Resources", href: "/img-resources", requiresAuth: true }
+      { icon: "📈", label: "Match Analytics", href: "/match-stats" },
+      { icon: "📝", label: "Interview Tracker", href: "/interviews" },
+      { icon: "🎯", label: "Rank List Builder", href: "/rank-list" },
+      { icon: "🌍", label: "IMG Resources", href: "/img-resources" },
+      { icon: "💼", label: "ERAS Manager", href: "/eras" },
+      { icon: "🏥", label: "Program Comparator", href: "/compare", requiresAuth: true, requiresPaid: true }
     ]
   },
   {
