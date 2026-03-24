@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
+import PremiumGate from '@/components/PremiumGate'
 
 interface Favorite {
   favorite_id: number
@@ -36,15 +37,10 @@ export default function Dashboard() {
   const [tempDeadline, setTempDeadline] = useState('')
 
   useEffect(() => {
-    if (!authLoading && (!user || !user.is_paid)) {
-      router.push('/')
-      return
-    }
-
     if (user && user.is_paid) {
       fetchFavorites()
     }
-  }, [user, authLoading, router])
+  }, [user, authLoading])
 
   const fetchFavorites = async () => {
     try {
@@ -162,6 +158,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <PremiumGate featureName="My Dashboard" previewHeight={400}>
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -412,6 +409,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      </PremiumGate>
     </div>
   )
 }

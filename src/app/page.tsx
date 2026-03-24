@@ -240,7 +240,7 @@ export default function HomePage() {
                     <div className="text-xs text-gray-500">Students</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-bold text-brand-red">450+</div>
+                    <div className="text-sm font-bold text-brand-red">208+</div>
                     <div className="text-xs text-gray-500">Programs</div>
                   </div>
                   <div className="text-center">
@@ -256,7 +256,7 @@ export default function HomePage() {
                     <div className="text-xs text-gray-500">Med Students</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-brand-red">450+</div>
+                    <div className="text-lg font-bold text-brand-red">208+</div>
                     <div className="text-xs text-gray-500">Programs Tracked</div>
                   </div>
                   <div className="text-center">

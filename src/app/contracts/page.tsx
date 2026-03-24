@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import Header from '@/components/Header'
+import PremiumGate from '@/components/PremiumGate'
 
 interface ContractClause {
   id: string
@@ -98,35 +99,6 @@ export default function ContractAnalyzerPage() {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
 
-  if (!user || !user.is_paid) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center">
-            <div className="text-6xl mb-6">📋</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Contract Analyzer</h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Understand physician employment contracts with clause-by-clause analysis, red flag identification, and a negotiation checklist.
-            </p>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                {['Clause-by-clause contract analysis', 'Red flag and green flag identification', 'Negotiability ratings for each clause', 'Interactive contract review checklist', 'Legal terminology glossary', 'Practice-type specific guidance'].map(f => (
-                  <div key={f} className="flex items-center text-sm text-gray-700">
-                    <span className="text-green-500 mr-3">✓</span><span>{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button onClick={() => window.location.href = '/'} className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors text-lg">
-              Upgrade to Pro — $99 Lifetime
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const categories = ['all', ...Array.from(new Set(contractClauses.map(c => c.category)))]
   const filtered = filterCategory === 'all' ? contractClauses : contractClauses.filter(c => c.category === filterCategory)
 
@@ -171,6 +143,7 @@ export default function ContractAnalyzerPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <PremiumGate featureName="Contract Analyzer" previewHeight={500}>
 
       {/* Hero */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
@@ -450,6 +423,7 @@ export default function ContractAnalyzerPage() {
           <p className="text-xs text-gray-400">This tool provides general information about physician employment contracts and is not a substitute for legal advice. Always consult with a healthcare attorney before signing any employment contract.</p>
         </div>
       </div>
+      </PremiumGate>
     </div>
   )
 }

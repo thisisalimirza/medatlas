@@ -19,6 +19,8 @@ interface NavSection {
   items: NavItem[]
 }
 
+// Toggle requiresPaid on any item to gate it behind PremiumGate on-page.
+// All items are always clickable — the paywall overlay shows on the page itself.
 const navigationData: NavSection[] = [
   {
     label: "General",
@@ -115,21 +117,6 @@ export default function MainNavigation() {
   }, [isOpen])
 
   const handleItemClick = (item: NavItem) => {
-    // Check auth requirements
-    if (item.requiresAuth && !user) {
-      setIsOpen(false)
-      // For now, redirect to home where they can sign up
-      router.push('/')
-      return
-    }
-
-    if (item.requiresPaid && (!user || !user.is_paid)) {
-      setIsOpen(false)
-      // Redirect to home for upgrade
-      router.push('/')
-      return
-    }
-
     setIsOpen(false)
 
     if (item.external) {
@@ -139,20 +126,8 @@ export default function MainNavigation() {
     }
   }
 
-  const canAccessItem = (item: NavItem) => {
-    if (item.requiresAuth && !user) return false
-    if (item.requiresPaid && (!user || !user.is_paid)) return false
-    return true
-  }
-
-  const getItemClassName = (item: NavItem) => {
-    const baseClass = "flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-150 cursor-pointer"
-    
-    if (!canAccessItem(item)) {
-      return `${baseClass} text-gray-400 bg-gray-50 cursor-not-allowed`
-    }
-
-    return `${baseClass} text-gray-700 hover:bg-brand-red hover:text-white group`
+  const isPremiumItem = (item: NavItem) => {
+    return item.requiresPaid && (!user || !user.is_paid)
   }
 
   return (
@@ -227,18 +202,13 @@ export default function MainNavigation() {
                     <div
                       key={item.href}
                       onClick={() => handleItemClick(item)}
-                      className={`flex items-center space-x-3 text-sm cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 ${
-                        !canAccessItem(item) 
-                          ? 'text-gray-400 cursor-not-allowed opacity-60' 
-                          : 'text-gray-700 hover:text-brand-red hover:bg-red-50 hover:scale-[1.02]'
-                      }`}
+                      className="flex items-center space-x-3 text-sm cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 text-gray-700 hover:text-brand-red hover:bg-red-50 hover:scale-[1.02]"
                     >
                       <span className="text-base w-5 text-center flex-shrink-0">{item.icon}</span>
                       <span className="flex-1 font-medium">{item.label}</span>
                       <div className="flex items-center space-x-1">
                         {item.external && <span className="text-xs text-gray-400">↗</span>}
-                        {item.requiresPaid && <span className="text-xs text-yellow-600">⭐</span>}
-                        {!canAccessItem(item) && <span className="text-xs text-gray-400">🔒</span>}
+                        {isPremiumItem(item) && <span className="text-xs text-yellow-600">⭐</span>}
                       </div>
                     </div>
                   ))}

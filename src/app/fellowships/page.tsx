@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/contexts/SupabaseAuthContext'
 import Header from '@/components/Header'
+import PremiumGate from '@/components/PremiumGate'
 
 interface Fellowship {
   id: string
@@ -119,7 +119,6 @@ const fellowshipData: Fellowship[] = [
 ]
 
 export default function FellowshipFinderPage() {
-  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'browse' | 'compare'>('browse')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterParent, setFilterParent] = useState('all')
@@ -127,35 +126,6 @@ export default function FellowshipFinderPage() {
   const [expandedFellowship, setExpandedFellowship] = useState<string | null>(null)
   const [compareList, setCompareList] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<'name' | 'positions' | 'competitiveness'>('name')
-
-  if (!user || !user.is_paid) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center">
-            <div className="text-6xl mb-6">🏛️</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Fellowship Finder</h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Explore medical fellowship programs across specialties with competitiveness data, requirements, and top programs.
-            </p>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                {['Browse 14+ fellowship specialties', 'Competitiveness ratings and position counts', 'Requirements and top program listings', 'Side-by-side fellowship comparison', 'Salary ranges and training duration', 'Parent specialty filtering'].map(f => (
-                  <div key={f} className="flex items-center text-sm text-gray-700">
-                    <span className="text-green-500 mr-3">✓</span><span>{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button onClick={() => window.location.href = '/'} className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors text-lg">
-              Upgrade to Pro — $99 Lifetime
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   const parentSpecialties = ['all', ...Array.from(new Set(fellowshipData.map(f => f.parentSpecialty)))]
   const compLevels = ['all', 'Very High', 'High', 'Moderate', 'Low']
@@ -188,6 +158,7 @@ export default function FellowshipFinderPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <PremiumGate featureName="Fellowship Finder" previewHeight={500}>
 
       {/* Hero */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
@@ -428,6 +399,7 @@ export default function FellowshipFinderPage() {
           <p className="text-xs text-gray-400">Fellowship data is compiled from NRMP, FREIDA, and publicly available program information. Position counts and competitiveness ratings are approximations based on recent match data. Verify specific program details with official sources.</p>
         </div>
       </div>
+      </PremiumGate>
     </div>
   )
 }

@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     
     const search = searchParams.get('search') || searchParams.get('q') || ''
     const type = searchParams.get('type')
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 500
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0
 
     const supabase = createServerClient()

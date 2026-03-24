@@ -2,6 +2,7 @@
 
 import { Place } from '@/types'
 import Image from 'next/image'
+import { useState } from 'react'
 
 interface PlaceCardProps {
   place: Place
@@ -9,6 +10,7 @@ interface PlaceCardProps {
 }
 
 export default function PlaceCard({ place, onClick }: PlaceCardProps) {
+  const [imgError, setImgError] = useState(false)
   const formatTuition = (tuition: number) => {
     if (tuition === 0) return 'Free'
     return `$${(tuition / 1000).toFixed(0)}K/yr`
@@ -60,16 +62,17 @@ export default function PlaceCard({ place, onClick }: PlaceCardProps) {
   }
 
   const sampleImage = getSampleImage(place.name)
-  
+
   // Check if photo_url is a valid, non-placeholder URL
   const isValidPhotoUrl = place.photo_url &&
     !place.photo_url.includes('example.com') &&
     !place.photo_url.includes('placeholder') &&
     !place.photo_url.includes('placehold.co') &&
     place.photo_url.startsWith('http')
-  
-  const imageUrl = isValidPhotoUrl ? place.photo_url! : sampleImage.url
-  const shouldShowCredit = !isValidPhotoUrl
+
+  const useWikiImage = isValidPhotoUrl && !imgError
+  const imageUrl = useWikiImage ? place.photo_url! : sampleImage.url
+  const shouldShowCredit = !useWikiImage
 
   return (
     <div 
@@ -78,7 +81,7 @@ export default function PlaceCard({ place, onClick }: PlaceCardProps) {
     >
       {/* Rank Badge - Top Left */}
       <div className="absolute top-3 left-3 z-10 bg-black bg-opacity-75 text-white rounded-full px-2 py-1 text-xs font-bold">
-        #{place.rank_overall ? Math.round(place.rank_overall * 10) : '?'}
+        #{place.rank_overall ? Math.round(place.rank_overall) : '?'}
       </div>
 
       {/* Quick Stats - Top Right */}
@@ -96,24 +99,26 @@ export default function PlaceCard({ place, onClick }: PlaceCardProps) {
           alt={place.name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          unoptimized={!!useWikiImage}
+          onError={() => setImgError(true)}
         />
-        
+
         {/* Overlay gradient for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10"></div>
+
         {/* Photo credit - top right, like nomad */}
         {shouldShowCredit && (
           <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
             📷 {sampleImage.credit.split(' by ')[1].split(' on')[0]}
           </div>
         )}
-        
+
         {/* Location label overlay - bottom of image */}
         <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="text-white font-bold text-lg drop-shadow-lg">
+          <h3 className="text-white font-bold text-lg leading-tight" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.5)' }}>
             {place.name}
           </h3>
-          <p className="text-white/90 text-sm drop-shadow">
+          <p className="text-white/90 text-sm" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>
             {place.city}, {place.state}
           </p>
         </div>

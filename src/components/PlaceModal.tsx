@@ -304,7 +304,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
                 <div className="text-sm text-gray-600">Cost of Living (monthly)</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 text-center" title="Composite ranking based on training quality, match rates, and student satisfaction">
-                <div className="text-2xl font-bold text-brand-red">#{place.rank_overall ? Math.round(place.rank_overall * 10) : '?'}</div>
+                <div className="text-2xl font-bold text-brand-red">#{place.rank_overall ? Math.round(place.rank_overall) : '?'}</div>
                 <div className="text-sm text-gray-600">National Ranking</div>
               </div>
             </div>

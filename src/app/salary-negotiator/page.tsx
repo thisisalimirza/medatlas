@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/contexts/SupabaseAuthContext'
 import Header from '@/components/Header'
+import PremiumGate from '@/components/PremiumGate'
 
 interface SpecialtySalary {
   specialty: string
@@ -63,7 +63,6 @@ function formatSalary(amount: number): string {
 }
 
 export default function SalaryNegotiatorPage() {
-  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'benchmarks' | 'calculator' | 'tips'>('benchmarks')
   const [selectedSpecialty, setSelectedSpecialty] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('Midwest')
@@ -79,35 +78,6 @@ export default function SalaryNegotiatorPage() {
   const [retirementMatch, setRetirementMatch] = useState('')
   const [loanRepayment, setLoanRepayment] = useState('')
   const [ptoWeeks, setPtoWeeks] = useState('4')
-
-  if (!user || !user.is_paid) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center">
-            <div className="text-6xl mb-6">💰</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">Salary Negotiator</h1>
-            <p className="text-lg text-gray-600 mb-8">
-              Data-driven salary benchmarks, negotiation strategies, and total compensation analysis for physicians.
-            </p>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                {['Specialty-specific salary benchmarks by region', 'Total compensation calculator', 'Negotiation tips from attending physicians', 'Practice type salary comparisons', 'Regional cost-of-living adjustments', 'RVU and compensation model analysis'].map((f) => (
-                  <div key={f} className="flex items-center text-sm text-gray-700">
-                    <span className="text-green-500 mr-3">✓</span><span>{f}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button onClick={() => window.location.href = '/'} className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors text-lg">
-              Upgrade to Pro — $99 Lifetime
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   const sorted = [...salaryData].sort((a, b) => {
     if (sortBy === 'specialty') return sortDir === 'asc' ? a.specialty.localeCompare(b.specialty) : b.specialty.localeCompare(a.specialty)
@@ -136,6 +106,7 @@ export default function SalaryNegotiatorPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <PremiumGate featureName="Salary Negotiator" previewHeight={500}>
 
       {/* Hero */}
       <div className="bg-gradient-to-r from-red-600 to-red-700 text-white">
@@ -413,6 +384,7 @@ export default function SalaryNegotiatorPage() {
           <p className="text-xs text-gray-400">Salary data is compiled from publicly available physician compensation surveys and may not reflect your specific situation. This tool is for informational purposes only and does not constitute financial or legal advice. Consult with a healthcare attorney or financial advisor for personalized guidance.</p>
         </div>
       </div>
+      </PremiumGate>
     </div>
   )
 }
