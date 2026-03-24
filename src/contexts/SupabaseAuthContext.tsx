@@ -112,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes FIRST — this is the primary mechanism
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mountedRef.current) return
 
       console.log('Auth event:', event)
@@ -131,7 +131,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_IN') {
           delete profileCacheRef.current[newSession.user.id]
         }
-        await loadUserProfile(newSession.user)
+        // Don't await — heavy async in onAuthStateChange blocks Supabase's auth state machine
+        loadUserProfile(newSession.user)
       } else {
         setUser(null)
         setLoading(false)
