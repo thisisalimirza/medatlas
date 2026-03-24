@@ -306,7 +306,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                 2,847+ members
               </span>
               <span className="text-gray-300">|</span>
-              <span>450+ programs</span>
+              <span>208+ programs</span>
             </div>
 
             {/* What you get */}
