@@ -97,21 +97,12 @@ export default function ComingSoonPage({
 
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <h3 className="font-semibold text-gray-900 mb-2">📋 Want updates?</h3>
-              <p className="text-gray-600 text-sm mb-4">
-                {requiresPaid 
+              <p className="text-gray-600 text-sm">
+                {requiresPaid
                   ? "This feature will be included in your MedStack Pro subscription. You'll be notified when it's ready!"
-                  : "Join our community to get notified when this feature launches!"
+                  : "MedStack Pro members will be the first to know when this feature launches."
                 }
               </p>
-              <a
-                href="https://t.me/+666ywZFkke5lMjQx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <span>💬</span>
-                <span>Join Community</span>
-              </a>
             </div>
 
             <div className="text-sm text-gray-500">

@@ -78,9 +78,8 @@ const navigationData: NavSection[] = [
   {
     label: "Community",
     items: [
-      { icon: "💬", label: "Live Chat", href: "https://t.me/+666ywZFkke5lMjQx", external: true },
-      { icon: "🧑‍🤝‍🧑", label: "Study Partners", href: "/study-partners", requiresAuth: true },
-      { icon: "📍", label: "Member Map", href: "/map", requiresAuth: true },
+      { icon: "💬", label: "Live Chat", href: "https://t.me/+666ywZFkke5lMjQx", external: true, requiresPaid: true },
+      { icon: "🧑‍🤝‍🧑", label: "Study Partners", href: "/study-partners" },
       { icon: "❓", label: "FAQ & Help", href: "/faq" }
     ]
   }
@@ -198,7 +197,13 @@ export default function MainNavigation() {
                   {section.label.toUpperCase()}
                 </h3>
                 <div className="grid grid-cols-1 gap-1">
-                  {section.items.map((item) => (
+                  {section.items
+                    .filter((item) => {
+                      // Hide external premium links (e.g. Telegram) from non-paid users
+                      if (item.external && item.requiresPaid && (!user || !user.is_paid)) return false
+                      return true
+                    })
+                    .map((item) => (
                     <div
                       key={item.href}
                       onClick={() => handleItemClick(item)}

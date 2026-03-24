@@ -37,8 +37,11 @@ export default function Dashboard() {
   const [tempDeadline, setTempDeadline] = useState('')
 
   useEffect(() => {
+    if (authLoading) return
     if (user && user.is_paid) {
       fetchFavorites()
+    } else {
+      setLoading(false)
     }
   }, [user, authLoading])
 
@@ -150,10 +153,6 @@ export default function Dashboard() {
         </div>
       </div>
     )
-  }
-
-  if (!user || !user.is_paid) {
-    return null // Will redirect
   }
 
   return (

@@ -27,16 +27,16 @@ export default function StudyGroupsPage() {
           href: "/study-partners"
         },
         {
-          title: "Community Chat",
-          description: "Join general study discussions",
-          icon: "💬",
-          href: "https://t.me/+666ywZFkke5lMjQx"
-        },
-        {
           title: "Timeline Tools",
           description: "Plan group study schedules",
           icon: "🗓️",
           href: "/tools/premed-timeline"
+        },
+        {
+          title: "Board Exam Prep",
+          description: "Study resources for boards",
+          icon: "📖",
+          href: "/step1-prep"
         }
       ]}
     />

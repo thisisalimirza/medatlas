@@ -31,19 +31,11 @@ export default function NotFound() {
 
           <div className="mt-10 text-sm text-gray-500">
             <p>
-              Need help? Join our{' '}
-              <a
-                href="https://t.me/+666ywZFkke5lMjQx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-red hover:underline font-medium"
-              >
-                community chat
-              </a>
-              {' '}or check our{' '}
+              Need help? Check our{' '}
               <Link href="/faq" className="text-brand-red hover:underline font-medium">
                 FAQ
               </Link>
+              {' '}or email help@mymedstack.com
             </p>
           </div>
         </div>

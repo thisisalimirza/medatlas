@@ -115,13 +115,14 @@ const medicalStages = [
 function PaymentProcessor() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { refreshUser } = useAuth()
+  const { refreshUser, user, sendMagicLink } = useAuth()
   const [status, setStatus] = useState<'loading' | 'onboarding' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const [userEmail, setUserEmail] = useState('')
   const [showConfetti, setShowConfetti] = useState(false)
   const [saving, setSaving] = useState(false)
   const [onboardingDone, setOnboardingDone] = useState(false)
+  const [autoLoginFailed, setAutoLoginFailed] = useState(false)
   const processedRef = useRef(false)
 
   // Onboarding form state
@@ -170,16 +171,27 @@ function PaymentProcessor() {
       // Step 2: Auto-sign in using the token from the API
       if (data.tokenHash) {
         try {
-          await supabase.auth.verifyOtp({
+          const { error: otpError } = await supabase.auth.verifyOtp({
             email: data.user.email,
             token_hash: data.tokenHash,
             type: 'email',
           })
-          await refreshUser()
+          if (otpError) {
+            console.error('Auto-login OTP error:', otpError)
+            setAutoLoginFailed(true)
+          } else {
+            await refreshUser()
+          }
         } catch (err) {
           console.error('Auto-login error:', err)
-          // Not fatal — they can still complete onboarding
+          setAutoLoginFailed(true)
+          // Send a magic link email as fallback
+          await sendMagicLink(data.user.email)
         }
+      } else {
+        setAutoLoginFailed(true)
+        // Send a magic link email as fallback
+        await sendMagicLink(data.user.email)
       }
 
       // Step 3: Show confetti + onboarding
@@ -190,7 +202,7 @@ function PaymentProcessor() {
       setStatus('error')
       setMessage('Something went wrong processing your payment.')
     }
-  }, [searchParams, refreshUser])
+  }, [searchParams, refreshUser, sendMagicLink])
 
   useEffect(() => {
     processPayment()
@@ -219,17 +231,27 @@ function PaymentProcessor() {
       if (data.success) {
         // If they set a password, sign them in with it for a solid session
         if (password) {
-          try {
-            await supabase.auth.signInWithPassword({
-              email: userEmail,
-              password,
-            })
-          } catch {
-            // Already signed in via token, no worries
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: userEmail,
+            password,
+          })
+          if (signInError) {
+            console.error('Password sign-in error:', signInError)
+          } else {
+            setAutoLoginFailed(false) // Successfully signed in
           }
         }
 
+        // Try to refresh user again (works if any sign-in method succeeded)
         await refreshUser()
+
+        // If still not logged in and no password was set, send a magic link
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        if (!currentSession && !password) {
+          await sendMagicLink(userEmail)
+          setAutoLoginFailed(true)
+        }
+
         setOnboardingDone(true)
       }
     } catch (error) {
@@ -362,6 +384,18 @@ function PaymentProcessor() {
                   Welcome to the MedStack community. You now have full access to all Pro features.
                 </p>
 
+                {/* If auto-login failed and user still isn't signed in, prompt them */}
+                {autoLoginFailed && !user && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-left">
+                    <p className="text-sm text-yellow-800 font-medium mb-2">
+                      We couldn't sign you in automatically.
+                    </p>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      Check your email (<strong>{userEmail}</strong>) for a magic link to log in, or use the login button on the homepage.
+                    </p>
+                  </div>
+                )}
+
                 {/* Telegram community invite */}
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 text-left">
                   <div className="flex items-start space-x-3">
@@ -432,15 +466,7 @@ function PaymentProcessor() {
                 </button>
 
                 <p className="text-sm text-gray-500">
-                  Need help? Email us at help@mymedstack.com or join our{' '}
-                  <a
-                    href="https://t.me/+666ywZFkke5lMjQx"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-brand-red hover:underline"
-                  >
-                    community chat
-                  </a>
+                  Need help? Email us at help@mymedstack.com
                 </p>
               </div>
             </div>

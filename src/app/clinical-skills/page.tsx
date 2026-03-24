@@ -27,10 +27,10 @@ export default function ClinicalSkillsPage() {
           href: "/tools/summer-programs"
         },
         {
-          title: "Community",
-          description: "Connect with clinical students",
-          icon: "💬",
-          href: "https://t.me/+666ywZFkke5lMjQx"
+          title: "Rotation Tracker",
+          description: "Track your clinical rotations",
+          icon: "🧾",
+          href: "/rotation-tracker"
         }
       ]}
     />

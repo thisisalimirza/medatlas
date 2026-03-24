@@ -14,8 +14,25 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Supabase client with detectSessionInUrl: true will automatically
-        // exchange the URL hash/params for a session. We just need to verify it worked.
+        // The URL may contain auth tokens in the hash fragment (#access_token=...)
+        // or as query params (?token_hash=...). Supabase's detectSessionInUrl handles this,
+        // but we also need to handle the PKCE code exchange flow.
+        const hash = window.location.hash
+        const params = new URLSearchParams(window.location.search)
+        const code = params.get('code')
+
+        // If we have a code param (PKCE flow), exchange it
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          if (exchangeError) {
+            console.error('Code exchange error:', exchangeError)
+            setStatus('error')
+            setMessage('Authentication failed. Please try logging in again.')
+            return
+          }
+        }
+
+        // Check if we got a session (either from detectSessionInUrl or code exchange)
         const { data: { session }, error } = await supabase.auth.getSession()
 
         if (error) {
@@ -53,7 +70,7 @@ export default function AuthCallbackPage() {
             subscription.unsubscribe()
             setStatus('error')
             setMessage('Login timed out. Please try again.')
-          }, 10000)
+          }, 15000)
         }
       } catch (error) {
         console.error('Auth callback error:', error)
@@ -102,15 +119,7 @@ export default function AuthCallbackPage() {
                 </button>
 
                 <p className="text-sm text-gray-500">
-                  Need help? Join our{' '}
-                  <a
-                    href="https://t.me/+666ywZFkke5lMjQx"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-brand-red hover:underline"
-                  >
-                    community chat
-                  </a>
+                  Need help? Email us at help@mymedstack.com
                 </p>
               </div>
             </>

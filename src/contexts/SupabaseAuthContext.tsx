@@ -161,10 +161,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const sendMagicLink = async (email: string, stage?: string, displayName?: string) => {
     try {
+      // Use NEXT_PUBLIC_URL for the redirect so magic links always point to the canonical domain
+      const siteUrl = process.env.NEXT_PUBLIC_URL || window.location.origin
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${siteUrl}/auth/callback`,
           data: {
             stage: stage || 'premed',
             display_name: displayName || email.split('@')[0]

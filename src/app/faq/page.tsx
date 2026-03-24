@@ -106,16 +106,7 @@ export default function FAQPage() {
               <div>
                 <p className="font-medium text-blue-900">Still have questions?</p>
                 <p className="text-blue-700 text-sm">
-                  Join our{' '}
-                  <a 
-                    href="https://t.me/+666ywZFkke5lMjQx" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="underline hover:no-underline font-medium"
-                  >
-                    community chat
-                  </a>
-                  {' '}or email us at help@mymedstack.com
+                  Email us at help@mymedstack.com — we typically respond within 24 hours.
                 </p>
               </div>
             </div>

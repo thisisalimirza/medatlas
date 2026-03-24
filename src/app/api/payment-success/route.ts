@@ -135,11 +135,16 @@ export async function POST(request: NextRequest) {
       })
 
     // Generate a magic link token for auto-login (no email click needed)
+    // Also send a proper magic link email as fallback in case verifyOtp fails
     let tokenHash: string | null = null
+    const siteUrl = process.env.NEXT_PUBLIC_URL || 'https://mymedstack.com'
     try {
       const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
         type: 'magiclink',
         email,
+        options: {
+          redirectTo: `${siteUrl}/auth/callback?payment=true`,
+        },
       })
       if (!linkError && linkData?.properties?.action_link) {
         const url = new URL(linkData.properties.action_link)

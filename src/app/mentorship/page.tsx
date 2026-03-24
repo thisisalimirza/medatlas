@@ -21,22 +21,22 @@ export default function MentorshipHubPage() {
       ]}
       currentAlternatives={[
         {
-          title: "Community Chat",
-          description: "Connect with experienced physicians",
-          icon: "💬",
-          href: "https://t.me/+666ywZFkke5lMjQx"
-        },
-        {
-          title: "Member Map",
-          description: "Find mentors in your area",
-          icon: "📍",
-          href: "/map"
-        },
-        {
           title: "Specialty Explorer",
           description: "Learn about different specialties",
           icon: "🎓",
           href: "/specialties"
+        },
+        {
+          title: "IMG Resources",
+          description: "International graduate resources",
+          icon: "🌍",
+          href: "/img-resources"
+        },
+        {
+          title: "Match Analytics",
+          description: "Residency match statistics",
+          icon: "📈",
+          href: "/match-stats"
         }
       ]}
     />

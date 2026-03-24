@@ -45,16 +45,7 @@ export default function Error({
             
             <div className="mt-8 text-sm text-gray-500">
               <p>
-                If this problem persists, please contact us via{' '}
-                <a 
-                  href="https://t.me/+666ywZFkke5lMjQx" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-brand-red hover:underline"
-                >
-                  community chat
-                </a>
-                {' '}or email help@mymedstack.com
+                If this problem persists, email us at help@mymedstack.com
               </p>
             </div>
             
