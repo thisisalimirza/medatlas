@@ -303,7 +303,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                   <span className="w-6 h-6 rounded-full bg-green-500 border-2 border-white flex items-center justify-center text-white text-[10px] font-bold">M</span>
                   <span className="w-6 h-6 rounded-full bg-purple-500 border-2 border-white flex items-center justify-center text-white text-[10px] font-bold">S</span>
                 </span>
-                2,847+ members
+                208+ medical programs
               </span>
               <span className="text-gray-300">|</span>
               <span>208+ programs</span>
@@ -314,7 +314,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
               <ul className="space-y-2.5">
                 {[
                   'Read all student & resident reviews',
-                  'Connect directly with students at each school',
+                  'Browse detailed program data and insights',
                   'Detailed cost breakdowns & financial planning',
                   'School comparison & rank list tools',
                   'Post your own reviews & insights',

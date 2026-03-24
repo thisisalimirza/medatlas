@@ -6,7 +6,7 @@ export default function StudyGroupsPage() {
       title="Study Groups"
       description="Form and join study groups with fellow medical students"
       icon="📱"
-      estimatedLaunch="Q2 2025"
+      estimatedLaunch="Coming Soon"
       requiresAuth={true}
       requiresPaid={false}
       features={[

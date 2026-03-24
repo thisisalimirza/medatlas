@@ -99,7 +99,7 @@ export default function MemberMapPage() {
                 <h3 className="font-semibold text-gray-900 mb-4">Preview: Interactive Features</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="bg-white rounded-lg p-3 shadow-sm">
-                    <span className="text-red-500">📍</span> 2,847 Members
+                    <span className="text-red-500">📍</span> 208+ Programs
                   </div>
                   <div className="bg-white rounded-lg p-3 shadow-sm">
                     <span className="text-blue-500">🏫</span> 450+ Schools
@@ -129,7 +129,7 @@ export default function MemberMapPage() {
 
             <div className="text-sm text-gray-500">
               <p>
-                <strong>Estimated Launch:</strong> Q1 2025 • 
+                <strong>Estimated Launch:</strong> Coming Soon • 
                 <strong> Privacy Controls:</strong> Full customization available
               </p>
             </div>
@@ -141,8 +141,8 @@ export default function MemberMapPage() {
           <h3 className="font-semibold text-gray-900 mb-4 text-center">🌎 Current MedStack Community</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4">
-              <div className="text-2xl font-bold text-brand-red">2,847+</div>
-              <div className="text-sm text-gray-600">Total Members</div>
+              <div className="text-2xl font-bold text-brand-red">208+</div>
+              <div className="text-sm text-gray-600">Programs Tracked</div>
             </div>
             <div className="text-center p-4">
               <div className="text-2xl font-bold text-blue-600">450+</div>

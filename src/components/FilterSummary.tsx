@@ -99,7 +99,7 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
     },
     {
       label: '🌍 IMG-Friendly Schools',
-      filters: { img_friendly: true, acceptance_rate: 'moderate' },
+      filters: { img_friendly: true },
       description: 'Welcoming to international students'
     },
     {

@@ -6,7 +6,7 @@ export default function ClinicalSkillsPage() {
       title="Clinical Skills"
       description="Master clinical skills with interactive training modules"
       icon="🩺"
-      estimatedLaunch="Q3 2025"
+      estimatedLaunch="Coming Soon"
       requiresAuth={true}
       requiresPaid={true}
       features={[

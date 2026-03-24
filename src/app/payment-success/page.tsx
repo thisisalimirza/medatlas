@@ -402,7 +402,7 @@ function PaymentProcessor() {
                     <div>
                       <h3 className="font-semibold text-blue-900 mb-1">Join the Community</h3>
                       <p className="text-sm text-blue-700 mb-3">
-                        Connect with 2,847+ med students and residents. Ask questions, share experiences, and get advice.
+                        Connect with med students and residents. Ask questions, share experiences, and get advice.
                       </p>
                       <a
                         href="https://t.me/+666ywZFkke5lMjQx"

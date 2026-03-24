@@ -49,7 +49,7 @@ export default function StudyPartnersPage() {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <span className="text-2xl block mb-2">🌍</span>
                   <h3 className="font-semibold text-gray-900 mb-1">Network</h3>
-                  <p className="text-sm text-gray-600">Connect with 2,800+ med students & residents</p>
+                  <p className="text-sm text-gray-600">Connect with med students & residents</p>
                 </div>
               </div>
 

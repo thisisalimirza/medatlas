@@ -13,7 +13,7 @@ const faqs = [
       },
       {
         question: "How much does MedStack cost?",
-        answer: "MedStack Pro is a one-time payment of $99 that provides lifetime access to all premium features, including detailed school reviews, cost calculators, timeline tools, and community features."
+        answer: "Starting at $20/year, MedStack Pro gives you full access to all premium features including detailed data, community access, and advanced tools."
       },
       {
         question: "What's included in the free version?",
@@ -51,7 +51,7 @@ const faqs = [
       },
       {
         question: "Do you offer student discounts?",
-        answer: "Our one-time $99 lifetime access is already heavily discounted compared to other platforms. We believe in making medical education resources affordable for all students."
+        answer: "Our plans start at just $20/year with the 5-year option. We believe in making medical education resources affordable for all students."
       }
     ]
   },
@@ -160,7 +160,7 @@ export default function FAQPage() {
           <div className="bg-brand-red text-white rounded-lg p-8">
             <h2 className="text-2xl font-bold mb-4">Ready to join MedStack?</h2>
             <p className="text-red-100 mb-6">
-              Join 2,800+ medical students and residents who are already using MedStack to navigate their careers.
+              Join MedStack to navigate your medical career.
             </p>
             <button 
               onClick={() => window.location.href = '/?signup=true'}

@@ -236,32 +236,24 @@ export default function HomePage() {
                 {/* Stats - Show on mobile as horizontal row */}
                 <div className="flex md:hidden items-center justify-between space-x-4 mb-2">
                   <div className="text-center">
-                    <div className="text-sm font-bold text-brand-red">2,847+</div>
-                    <div className="text-xs text-gray-500">Students</div>
-                  </div>
-                  <div className="text-center">
                     <div className="text-sm font-bold text-brand-red">208+</div>
                     <div className="text-xs text-gray-500">Programs</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-bold text-brand-red">95%</div>
-                    <div className="text-xs text-gray-500">Match Rate</div>
+                    <div className="text-sm font-bold text-brand-red">50+</div>
+                    <div className="text-xs text-gray-500">States</div>
                   </div>
                 </div>
                 
                 {/* Stats - Desktop version */}
                 <div className="hidden md:flex items-center space-x-6">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-brand-red">2,847+</div>
-                    <div className="text-xs text-gray-500">Med Students</div>
-                  </div>
-                  <div className="text-center">
                     <div className="text-lg font-bold text-brand-red">208+</div>
                     <div className="text-xs text-gray-500">Programs Tracked</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-brand-red">95%</div>
-                    <div className="text-xs text-gray-500">Match Success</div>
+                    <div className="text-lg font-bold text-brand-red">50+</div>
+                    <div className="text-xs text-gray-500">States Covered</div>
                   </div>
                 </div>
               </div>

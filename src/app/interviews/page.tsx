@@ -421,7 +421,7 @@ export default function InterviewTrackerPage() {
             <h3 className="font-bold text-gray-900 mt-2">AI Mock Interview Questions</h3>
             <p className="text-sm text-gray-600 mt-1 mb-3">Generate specialty-specific practice questions with AI. Available for Pro members.</p>
             <button onClick={() => window.location.href = '/'} className="bg-red-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
-              Upgrade to Pro — $99 Lifetime
+              Upgrade to Pro
             </button>
           </div>
         )}

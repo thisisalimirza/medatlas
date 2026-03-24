@@ -6,7 +6,7 @@ export default function MentorshipHubPage() {
       title="Mentorship Hub"
       description="Connect with mentors and build meaningful professional relationships"
       icon="👨‍🏫"
-      estimatedLaunch="Q1 2025"
+      estimatedLaunch="Coming Soon"
       requiresAuth={true}
       requiresPaid={false}
       features={[

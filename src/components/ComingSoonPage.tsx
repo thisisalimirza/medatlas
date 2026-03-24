@@ -146,13 +146,13 @@ export default function ComingSoonPage({
           <div className="mt-8 bg-brand-red text-white rounded-lg p-6 text-center">
             <h3 className="text-xl font-bold mb-2">🌟 Upgrade to MedStack Pro</h3>
             <p className="mb-4 text-red-100">
-              This feature will be included in MedStack Pro. Upgrade now for lifetime access to all premium tools!
+              This feature will be included in MedStack Pro. Upgrade now for full access to all premium tools!
             </p>
             <button 
               onClick={() => window.location.href = '/?upgrade=true'}
               className="bg-white text-brand-red px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
-              Upgrade Now - $99 Lifetime
+              Upgrade to Pro
             </button>
           </div>
         )}
