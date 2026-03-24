@@ -335,7 +335,7 @@ export default function ComparisonTool({ isOpen, onClose, initialPlaces = [] }: 
                       )}`
                       const link = document.createElement('a')
                       link.href = dataUrl
-                      link.download = 'medatlas-comparison.csv'
+                      link.download = 'medstack-comparison.csv'
                       link.click()
                     }}
                     className="btn-red"

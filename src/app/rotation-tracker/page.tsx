@@ -418,7 +418,7 @@ export default function RotationTrackerPage() {
         </div>
 
         <div className="border-t border-gray-200 pt-4 mt-8 text-center text-xs text-gray-400">
-          <p>Data is stored locally in your browser. Sign up for MedAtlas Pro to save across devices.</p>
+          <p>Data is stored locally in your browser. Sign up for MedStack Pro to save across devices.</p>
         </div>
       </div>
     </div>

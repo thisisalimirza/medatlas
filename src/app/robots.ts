@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://medatlas-omega.vercel.app/sitemap.xml',
+    sitemap: 'https://mymedstack.com/sitemap.xml',
   }
 }

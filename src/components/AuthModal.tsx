@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 interface AuthModalProps {
@@ -10,94 +10,38 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: AuthModalProps) {
-  const [formData, setFormData] = useState({
-    email: '',
-    stage: 'premed',
-    displayName: '',
-  })
   const [selectedPlan, setSelectedPlan] = useState<'5year' | 'annual'>('5year')
   const [errors, setErrors] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<'paywall' | 'details' | 'sent' | 'login'>(() =>
-    initialMode === 'login' ? 'login' : 'paywall'
-  )
-  const { sendMagicLink } = useAuth()
+  const [step, setStep] = useState<'paywall' | 'login' | 'sent'>('paywall')
+  const [loginMethod, setLoginMethod] = useState<'magic' | 'password'>('magic')
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const { sendMagicLink, signInWithPassword } = useAuth()
 
-  const medicalStages = [
-    { value: 'premed', label: 'Pre-med Student', emoji: '📚' },
-    { value: 'ms1', label: 'MS1 (First Year)', emoji: '👨‍⚕️' },
-    { value: 'ms2', label: 'MS2 (Second Year)', emoji: '👩‍⚕️' },
-    { value: 'ms3', label: 'MS3 (Third Year)', emoji: '🏥' },
-    { value: 'ms4', label: 'MS4 (Fourth Year)', emoji: '🎓' },
-    { value: 'resident', label: 'Resident', emoji: '👨‍⚕️' },
-    { value: 'attending', label: 'Attending', emoji: '🩺' },
-  ]
+  // Fix: sync step with initialMode whenever the modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setStep(initialMode === 'login' ? 'login' : 'paywall')
+      setErrors([])
+      setLoading(false)
+      setLoginEmail('')
+      setLoginPassword('')
+      setLoginMethod('magic')
+    }
+  }, [isOpen, initialMode])
 
   if (!isOpen) return null
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCheckout = async () => {
     setLoading(true)
     setErrors([])
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(formData.email)) {
-      setErrors(['Please enter a valid email address'])
-      setLoading(false)
-      return
-    }
-
-    try {
-      // Check if user exists and is paid
-      const response = await fetch('/api/auth/check-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
-      })
-      const data = await response.json()
-
-      if (data.success && data.userExists && data.isPaid) {
-        const result = await sendMagicLink(formData.email)
-        if (result.success) {
-          setStep('sent')
-        } else {
-          setErrors([result.error || 'Failed to send login link'])
-        }
-      } else if (data.success) {
-        // User doesn't exist or isn't paid — show paywall
-        setStep('paywall')
-      } else {
-        setErrors([data.error || 'Failed to check user status'])
-      }
-    } catch {
-      setErrors(['Something went wrong. Please try again.'])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCheckoutSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setErrors([])
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(formData.email)) {
-      setErrors(['Please enter a valid email address'])
-      setLoading(false)
-      return
-    }
 
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          stage: formData.stage,
-          displayName: formData.displayName,
-          plan: selectedPlan,
-        }),
+        body: JSON.stringify({ plan: selectedPlan }),
       })
 
       const data = await response.json()
@@ -114,21 +58,85 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
     }
   }
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  const handleMagicLinkLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
     setErrors([])
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(loginEmail)) {
+      setErrors(['Please enter a valid email address'])
+      setLoading(false)
+      return
+    }
+
+    try {
+      // Check if user exists and is paid
+      const checkRes = await fetch('/api/auth/check-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail }),
+      })
+      const checkData = await checkRes.json()
+
+      if (checkData.success && checkData.userExists && checkData.isPaid) {
+        const result = await sendMagicLink(loginEmail)
+        if (result.success) {
+          setStep('sent')
+        } else {
+          setErrors([result.error || 'Failed to send login link'])
+        }
+      } else if (checkData.success) {
+        // User doesn't exist or isn't paid — show paywall
+        setStep('paywall')
+      } else {
+        setErrors([checkData.error || 'Failed to check user status'])
+      }
+    } catch {
+      setErrors(['Something went wrong. Please try again.'])
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const resetModal = () => {
-    setFormData({ email: '', stage: 'premed', displayName: '' })
-    setSelectedPlan('5year')
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
     setErrors([])
-    setLoading(false)
-    setStep(initialMode === 'login' ? 'login' : 'paywall')
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(loginEmail)) {
+      setErrors(['Please enter a valid email address'])
+      setLoading(false)
+      return
+    }
+
+    if (!loginPassword) {
+      setErrors(['Please enter your password'])
+      setLoading(false)
+      return
+    }
+
+    try {
+      const result = await signInWithPassword(loginEmail, loginPassword)
+      if (result.success) {
+        onClose()
+      } else {
+        setErrors([result.error || 'Invalid email or password'])
+      }
+    } catch {
+      setErrors(['Something went wrong. Please try again.'])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleClose = () => {
-    resetModal()
+    setSelectedPlan('5year')
+    setErrors([])
+    setLoading(false)
+    setLoginEmail('')
+    setLoginPassword('')
     onClose()
   }
 
@@ -144,13 +152,37 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
-                <p className="text-gray-500 text-sm mt-1">Sign in to your MedAtlas account</p>
+                <p className="text-gray-500 text-sm mt-1">Sign in to your MedStack account</p>
               </div>
               <button
                 onClick={handleClose}
                 className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              </button>
+            </div>
+
+            {/* Login method tabs */}
+            <div className="flex bg-gray-100 rounded-lg p-1 mb-5">
+              <button
+                onClick={() => { setLoginMethod('magic'); setErrors([]) }}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  loginMethod === 'magic'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Magic Link
+              </button>
+              <button
+                onClick={() => { setLoginMethod('password'); setErrors([]) }}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                  loginMethod === 'password'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Password
               </button>
             </div>
 
@@ -162,28 +194,73 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
               </div>
             )}
 
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
-                  placeholder="your@email.com"
-                  required
-                  autoFocus
-                />
-              </div>
+            {loginMethod === 'magic' ? (
+              <form onSubmit={handleMagicLinkLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => { setLoginEmail(e.target.value); setErrors([]) }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
+                    placeholder="your@email.com"
+                    required
+                    autoFocus
+                  />
+                </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Sending link...' : 'Send Magic Link'}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Sending link...' : 'Send Magic Link'}
+                </button>
+
+                <p className="text-xs text-gray-400 text-center">
+                  We'll email you a secure sign-in link. No password needed.
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handlePasswordLogin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => { setLoginEmail(e.target.value); setErrors([]) }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
+                    placeholder="your@email.com"
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => { setLoginPassword(e.target.value); setErrors([]) }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-red-500 text-white font-semibold py-3 rounded-xl hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
+                </button>
+
+                <p className="text-xs text-gray-400 text-center">
+                  Only available if you set a password during onboarding.
+                </p>
+              </form>
+            )}
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-500">
@@ -192,7 +269,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                   onClick={() => setStep('paywall')}
                   className="text-red-500 font-medium hover:underline"
                 >
-                  Join MedAtlas
+                  Join MedStack
                 </button>
               </p>
             </div>
@@ -205,7 +282,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
             {/* Header */}
             <div className="flex items-start justify-between mb-2">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Join MedAtlas Pro</h2>
+                <h2 className="text-2xl font-bold text-gray-900">Join MedStack Pro</h2>
                 <p className="text-gray-500 text-sm mt-1">
                   The toolkit for your medical journey
                 </p>
@@ -244,12 +321,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                   'Access to exclusive community features',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start space-x-2.5 text-sm">
-                    <span className="text-green-500 mt-0.5 flex-shrink-0">✓</span>
+                    <span className="text-green-500 mt-0.5 flex-shrink-0">&#10003;</span>
                     <span className="text-gray-700">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
+
+            {errors.length > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                {errors.map((error, i) => (
+                  <p key={i} className="text-red-700 text-sm">{error}</p>
+                ))}
+              </div>
+            )}
 
             {/* Pricing cards */}
             <div className="space-y-3 mb-6">
@@ -331,12 +416,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
               </div>
             )}
 
-            {/* CTA */}
+            {/* CTA — goes directly to Stripe */}
             <button
-              onClick={() => setStep('details')}
-              className="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 transition-all duration-200 text-lg shadow-sm hover:shadow-md"
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 transition-all duration-200 text-lg shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Continue — {selectedPlan === '5year' ? '$100' : '$60/yr'}
+              {loading ? 'Redirecting to checkout...' : `Continue — ${selectedPlan === '5year' ? '$100' : '$60/yr'}`}
             </button>
 
             {/* Existing user link */}
@@ -354,100 +440,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
 
             {/* Trust */}
             <div className="mt-4 flex items-center justify-center space-x-4 text-xs text-gray-400">
-              <span>🔒 Secure checkout</span>
+              <span>Secure checkout</span>
               <span>30-day refund</span>
               <span>Cancel anytime</span>
             </div>
-          </div>
-        )}
-
-        {/* ────────────────────── DETAILS STEP ────────────────────── */}
-        {step === 'details' && (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Almost there!</h2>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  {selectedPlan === '5year' ? '5-Year Access — $100' : 'Annual Access — $60/yr'}
-                </p>
-              </div>
-              <button
-                onClick={handleClose}
-                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-              </button>
-            </div>
-
-            {errors.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                {errors.map((error, i) => (
-                  <p key={i} className="text-red-700 text-sm">{error}</p>
-                ))}
-              </div>
-            )}
-
-            <form onSubmit={handleCheckoutSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
-                  placeholder="your@email.com"
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Display Name <span className="text-gray-400 font-normal">(optional)</span></label>
-                <input
-                  type="text"
-                  value={formData.displayName}
-                  onChange={(e) => handleInputChange('displayName', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base"
-                  placeholder="How should others see your name?"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Current Stage</label>
-                <select
-                  value={formData.stage}
-                  onChange={(e) => handleInputChange('stage', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-base bg-white"
-                >
-                  {medicalStages.map((stage) => (
-                    <option key={stage.value} value={stage.value}>
-                      {stage.emoji} {stage.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setStep('paywall')}
-                  className="px-5 py-3 text-sm font-medium border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-gray-600"
-                >
-                  ← Back
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-base shadow-sm"
-                >
-                  {loading ? 'Redirecting to checkout...' : `Pay ${selectedPlan === '5year' ? '$100' : '$60'} →`}
-                </button>
-              </div>
-            </form>
-
-            <p className="text-xs text-gray-400 text-center mt-4">
-              🔒 You'll be redirected to Stripe for secure payment
-            </p>
           </div>
         )}
 
@@ -456,26 +452,26 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
           <div className="p-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">📧</span>
+                <span className="text-3xl">&#x1F4E7;</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Check your inbox</h3>
               <p className="text-gray-600 mb-6">
-                We sent a magic login link to <strong className="text-gray-900">{formData.email}</strong>
+                We sent a magic login link to <strong className="text-gray-900">{loginEmail}</strong>
               </p>
 
               <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
                 <h4 className="font-medium text-sm mb-2 text-gray-700">Don't see it?</h4>
                 <ul className="text-sm text-gray-500 space-y-1.5">
                   <li className="flex items-start space-x-2">
-                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-400">&bull;</span>
                     <span>Check your spam/junk folder</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-400">&bull;</span>
                     <span>The link expires in 1 hour</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-gray-400">•</span>
+                    <span className="text-gray-400">&bull;</span>
                     <span>Try clicking the link from your phone if on desktop</span>
                   </li>
                 </ul>
@@ -485,7 +481,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                 onClick={() => { setStep('login'); setErrors([]) }}
                 className="text-red-500 hover:underline text-sm font-medium"
               >
-                ← Try a different email
+                &larr; Try a different email
               </button>
             </div>
           </div>

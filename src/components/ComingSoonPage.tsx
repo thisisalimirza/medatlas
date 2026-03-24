@@ -99,7 +99,7 @@ export default function ComingSoonPage({
               <h3 className="font-semibold text-gray-900 mb-2">📋 Want updates?</h3>
               <p className="text-gray-600 text-sm mb-4">
                 {requiresPaid 
-                  ? "This feature will be included in your MedAtlas Pro subscription. You'll be notified when it's ready!"
+                  ? "This feature will be included in your MedStack Pro subscription. You'll be notified when it's ready!"
                   : "Join our community to get notified when this feature launches!"
                 }
               </p>
@@ -120,7 +120,7 @@ export default function ComingSoonPage({
                 {requiresPaid && (
                   <>
                     {' • '}
-                    <strong>Included in:</strong> MedAtlas Pro
+                    <strong>Included in:</strong> MedStack Pro
                   </>
                 )}
               </p>
@@ -153,9 +153,9 @@ export default function ComingSoonPage({
         {/* Upgrade Prompt for Non-Paid Users */}
         {requiresPaid && user && !user.is_paid && (
           <div className="mt-8 bg-brand-red text-white rounded-lg p-6 text-center">
-            <h3 className="text-xl font-bold mb-2">🌟 Upgrade to MedAtlas Pro</h3>
+            <h3 className="text-xl font-bold mb-2">🌟 Upgrade to MedStack Pro</h3>
             <p className="mb-4 text-red-100">
-              This feature will be included in MedAtlas Pro. Upgrade now for lifetime access to all premium tools!
+              This feature will be included in MedStack Pro. Upgrade now for lifetime access to all premium tools!
             </p>
             <button 
               onClick={() => window.location.href = '/?upgrade=true'}

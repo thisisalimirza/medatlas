@@ -169,7 +169,7 @@ export default function HomePage() {
           <div className="flex items-center space-x-3">
             <div className="text-2xl">🎉</div>
             <div>
-              <div className="font-semibold text-green-800">Welcome to MedAtlas Pro!</div>
+              <div className="font-semibold text-green-800">Welcome to MedStack Pro!</div>
               <div className="text-sm text-green-600">Your payment was successful. You now have full access!</div>
             </div>
             <button 

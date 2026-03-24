@@ -160,7 +160,7 @@ export default function SummerProgramsPage() {
             {!isUserPaid && (
               <div className="flex items-center space-x-2 text-sm text-amber-700 bg-amber-50 px-3 py-1 rounded-full">
                 <span>🔒</span>
-                <span>Some details require MedAtlas Pro</span>
+                <span>Some details require MedStack Pro</span>
               </div>
             )}
           </div>
@@ -353,7 +353,7 @@ export default function SummerProgramsPage() {
                   onClick={() => window.location.href = '/?upgrade=true'}
                   className="w-full btn-red"
                 >
-                  Upgrade to MedAtlas Pro
+                  Upgrade to MedStack Pro
                 </button>
                 <button 
                   onClick={() => setShowPaywall(false)}

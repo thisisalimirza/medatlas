@@ -2,7 +2,7 @@ export default function MinimalPage() {
   return (
     <html>
       <head>
-        <title>MedAtlas - Minimal Test</title>
+        <title>MedStack - Minimal Test</title>
         <style>{`
           body { 
             font-family: Arial, sans-serif; 
@@ -37,7 +37,7 @@ export default function MinimalPage() {
       </head>
       <body>
         <div className="container">
-          <h1>🏥 MedAtlas - Minimal Test</h1>
+          <h1>🏥 MedStack - Minimal Test</h1>
           <div className="status">✅ Basic routing is working!</div>
           <div className="status">✅ Next.js is deployed correctly!</div>
           <div className="status">✅ This page loaded successfully!</div>

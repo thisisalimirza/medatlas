@@ -54,7 +54,7 @@ export default function Error({
                 >
                   community chat
                 </a>
-                {' '}or email help@medatlas.com
+                {' '}or email help@mymedstack.com
               </p>
             </div>
             

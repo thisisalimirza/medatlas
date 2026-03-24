@@ -4,23 +4,23 @@ import { AuthProvider } from '@/contexts/SupabaseAuthContext'
 
 export const metadata: Metadata = {
   title: {
-    default: 'MedAtlas - Medical School & Residency Explorer',
-    template: '%s | MedAtlas',
+    default: 'MedStack - Medical School & Residency Explorer',
+    template: '%s | MedStack',
   },
   description: 'Explore and compare medical schools, residency programs, and rotation sites. Free tools for pre-med students including MCAT calculator, GPA calculator, application timeline, and match statistics.',
   keywords: ['medical school', 'residency programs', 'MCAT calculator', 'GPA calculator', 'medical school admissions', 'residency match', 'pre-med tools', 'medical school rankings', 'rotation sites', 'medical school comparison'],
-  metadataBase: new URL('https://medatlas-omega.vercel.app'),
+  metadataBase: new URL('https://mymedstack.com'),
   openGraph: {
-    title: 'MedAtlas - Medical School & Residency Explorer',
+    title: 'MedStack - Medical School & Residency Explorer',
     description: 'Explore and compare medical schools, residency programs, and rotation sites with free tools for pre-med and medical students.',
-    url: 'https://medatlas-omega.vercel.app',
-    siteName: 'MedAtlas',
+    url: 'https://mymedstack.com',
+    siteName: 'MedStack',
     type: 'website',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MedAtlas - Medical School & Residency Explorer',
+    title: 'MedStack - Medical School & Residency Explorer',
     description: 'Explore and compare medical schools, residency programs, and rotation sites with free tools for pre-med and medical students.',
   },
   robots: {
@@ -35,15 +35,15 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://medatlas-omega.vercel.app',
+    canonical: 'https://mymedstack.com',
   },
 }
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'MedAtlas',
-  url: 'https://medatlas-omega.vercel.app',
+  name: 'MedStack',
+  url: 'https://mymedstack.com',
   description: 'Explore and compare medical schools, residency programs, and rotation sites. Free tools for pre-med and medical students including MCAT calculator, GPA calculator, application timeline, and match statistics.',
   applicationCategory: 'EducationalApplication',
   operatingSystem: 'Web',
@@ -59,8 +59,8 @@ const jsonLd = {
   },
   creator: {
     '@type': 'Organization',
-    name: 'MedAtlas',
-    url: 'https://medatlas-omega.vercel.app',
+    name: 'MedStack',
+    url: 'https://mymedstack.com',
   },
 }
 

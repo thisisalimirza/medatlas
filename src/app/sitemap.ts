@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 
-const BASE_URL = 'https://medatlas-omega.vercel.app'
+const BASE_URL = 'https://mymedstack.com'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date()

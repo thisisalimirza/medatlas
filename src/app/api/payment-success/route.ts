@@ -6,10 +6,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_...', {
   apiVersion: '2025-07-30.basil',
 })
 
+/**
+ * POST /api/payment-success
+ *
+ * Called after Stripe checkout completes. Retrieves the session from Stripe,
+ * extracts customer email from customer_details (Stripe-collected), creates
+ * or updates the Supabase auth user + profile, and records the payment.
+ *
+ * Body: { session_id, password?, displayName?, stage? }
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { session_id, password, stage } = body
+    const { session_id, password, displayName, stage } = body
 
     if (!session_id) {
       return NextResponse.json(
@@ -28,117 +37,129 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { email } = session.metadata || {}
+    // Get email from Stripe's customer_details (collected by Stripe checkout)
+    const email = session.customer_details?.email || session.metadata?.email
     if (!email) {
       return NextResponse.json(
-        { success: false, error: 'Missing user email' },
+        { success: false, error: 'Missing customer email from Stripe session' },
         { status: 400 }
       )
     }
 
-    // Check if user already exists in Supabase
-    const { data: existingUser, error: findError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('*')
-      .eq('email', email)
-      .single()
+    const customerName = session.customer_details?.name || displayName || ''
+    const plan = session.metadata?.plan || '5year'
 
-    let user
-    if (existingUser && !findError) {
-      // Update existing user to paid status
-      const { data: updatedUser, error: updateError } = await supabaseAdmin
-        .from('user_profiles')
-        .update({ 
-          is_paid: true,
-          stage: stage || existingUser.stage || 'premed',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existingUser.id)
-        .select()
-        .single()
+    // Check if user already exists in Supabase auth
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+    const existingAuthUser = existingUsers?.users?.find(u => u.email === email)
 
-      if (updateError) {
-        console.error('Update user error:', updateError)
-        return NextResponse.json(
-          { success: false, error: 'Failed to update account' },
-          { status: 500 }
-        )
-      }
-      user = updatedUser
+    let userId: string
 
-      // If password provided, update the user's auth password
+    if (existingAuthUser) {
+      userId = existingAuthUser.id
+
+      // If password provided, update the auth user's password
       if (password) {
-        const { error: passwordError } = await supabaseAdmin.auth.admin.updateUserById(
-          user.id,
-          { password }
-        )
-        if (passwordError) {
-          console.error('Password update error:', passwordError)
-        }
+        await supabaseAdmin.auth.admin.updateUserById(userId, { password })
       }
     } else {
-      // Create new user in Supabase auth first
+      // Create new user in Supabase auth
       const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
-        password: password || Math.random().toString(36).slice(-8), // Random password if not provided
-        email_confirm: true
+        password: password || undefined,
+        email_confirm: true,
+        user_metadata: {
+          display_name: customerName || email.split('@')[0],
+          stage: stage || 'premed',
+        },
       })
 
-      if (authError) {
+      if (authError || !authUser.user) {
         console.error('Auth user creation error:', authError)
         return NextResponse.json(
           { success: false, error: 'Failed to create auth user' },
           { status: 500 }
         )
       }
+      userId = authUser.user.id
+    }
 
-      // Update user_profiles with payment status (the trigger should have created the profile)
-      const { data: newUser, error: createError } = await supabaseAdmin
+    // Upsert the user profile
+    const profileData = {
+      id: userId,
+      email,
+      display_name: customerName || displayName || email.split('@')[0],
+      stage: stage || 'premed',
+      is_paid: true,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('user_profiles')
+      .upsert(profileData, { onConflict: 'id' })
+      .select()
+      .single()
+
+    if (profileError) {
+      console.error('Profile upsert error:', profileError)
+      // Try update as fallback
+      const { data: updatedProfile, error: updateError } = await supabaseAdmin
         .from('user_profiles')
-        .update({
-          is_paid: true,
-          stage: stage || 'premed',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', authUser.user?.id)
+        .update({ is_paid: true, display_name: profileData.display_name, stage: profileData.stage, updated_at: profileData.updated_at })
+        .eq('email', email)
         .select()
         .single()
 
-      if (createError) {
-        console.error('Create user error:', createError)
+      if (updateError) {
+        console.error('Profile update fallback error:', updateError)
         return NextResponse.json(
-          { success: false, error: 'Failed to create account' },
+          { success: false, error: 'Failed to update user profile' },
           { status: 500 }
         )
       }
-      user = newUser
     }
 
-    // Record the payment in Supabase
-    const amountCents = session.amount_total || parseInt(process.env.MEDATLAS_PRICE_CENTS || '9900')
-    const { error: paymentError } = await supabaseAdmin
+    // Record the payment
+    const amountCents = session.amount_total || 0
+    await supabaseAdmin
       .from('payments')
       .upsert({
-        user_id: user.id,
+        user_id: userId,
         stripe_session_id: session_id,
         amount_cents: amountCents,
-        created_at: new Date().toISOString()
+        plan,
+        created_at: new Date().toISOString(),
+      })
+      .then(({ error }) => {
+        if (error) console.error('Payment record error:', error)
       })
 
-    if (paymentError) {
-      console.error('Payment record error:', paymentError)
-      // Don't fail the whole process if payment recording fails
+    // Generate a magic link token for auto-login (no email click needed)
+    let tokenHash: string | null = null
+    try {
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email,
+      })
+      if (!linkError && linkData?.properties?.action_link) {
+        const url = new URL(linkData.properties.action_link)
+        tokenHash = url.searchParams.get('token_hash') || url.searchParams.get('token')
+      }
+    } catch (err) {
+      console.error('Auto-login token generation error:', err)
     }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
-        stage: user.stage,
-        display_name: user.display_name,
-        is_paid: true
-      }
+        id: userId,
+        email,
+        display_name: profileData.display_name,
+        stage: profileData.stage,
+        is_paid: true,
+      },
+      tokenHash,
+      hasPassword: !!password,
     })
   } catch (error) {
     console.error('Payment success error:', error)

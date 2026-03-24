@@ -435,7 +435,7 @@ export default function InterviewTrackerPage() {
         </div>
 
         <div className="border-t border-gray-200 pt-4 mt-8 text-center text-xs text-gray-400">
-          <p>Data stored locally. Sign up for MedAtlas Pro to sync across devices.</p>
+          <p>Data stored locally. Sign up for MedStack Pro to sync across devices.</p>
         </div>
       </div>
     </div>

@@ -243,7 +243,7 @@ export default function RankListBuilderPage() {
                     )}
                   </>
                 )}
-                <p className="text-xs text-gray-400 mt-6 text-center">Data stored locally. Sign up for MedAtlas Pro to sync across devices.</p>
+                <p className="text-xs text-gray-400 mt-6 text-center">Data stored locally. Sign up for MedStack Pro to sync across devices.</p>
               </div>
             )}
 

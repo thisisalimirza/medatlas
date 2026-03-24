@@ -11,7 +11,7 @@ export async function fetchWikipediaImage(schoolName: string): Promise<string | 
 
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'MedAtlas/1.0 (medical school explorer; contact@medatlas.com)' },
+        headers: { 'User-Agent': 'MedStack/1.0 (medical school explorer; contact@mymedstack.com)' },
         next: { revalidate: 604800 },
       })
 

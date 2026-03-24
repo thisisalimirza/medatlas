@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 
 // Check if user is admin (you can expand this logic as needed)
 const isAdmin = (user: any) => {
-  return user?.email === 'admin@medatlas.com' || user?.email?.includes('@medatlas.com')
+  return user?.email === 'admin@mymedstack.com' || user?.email?.includes('@mymedstack.com')
 }
 
 export async function GET(request: NextRequest) {

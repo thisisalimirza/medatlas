@@ -118,7 +118,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
-              <p className="text-gray-600">Manage your MedAtlas account</p>
+              <p className="text-gray-600">Manage your MedStack account</p>
             </div>
           </div>
 
@@ -197,7 +197,7 @@ export default function ProfilePage() {
                     ? 'bg-yellow-100 text-yellow-800' 
                     : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {user.is_paid ? '⭐ MedAtlas Pro' : '🆓 Free Account'}
+                  {user.is_paid ? '⭐ MedStack Pro' : '🆓 Free Account'}
                 </span>
               </div>
               {!user.is_paid && (

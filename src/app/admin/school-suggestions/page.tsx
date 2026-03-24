@@ -30,7 +30,7 @@ export default function AdminSchoolSuggestionsPage() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending')
 
   // Check if user is admin (you'll need to update this with actual admin logic)
-  const isAdmin = user?.email === 'admin@medatlas.com' || user?.email?.includes('@medatlas.com')
+  const isAdmin = user?.email === 'admin@mymedstack.com' || user?.email?.includes('@mymedstack.com')
 
   useEffect(() => {
     if (!authLoading && !user) {

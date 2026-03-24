@@ -228,7 +228,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                   className="px-3 sm:px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-full hover:bg-red-600 hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <span className="sm:hidden">Join</span>
-                  <span className="hidden sm:inline">Join MedAtlas +</span>
+                  <span className="hidden sm:inline">Join MedStack +</span>
                 </button>
               </div>
             )}

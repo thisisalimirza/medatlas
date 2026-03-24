@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Medical School Prerequisites Checker | MedAtlas',
+  title: 'Medical School Prerequisites Checker | MedStack',
   description: 'Track your medical school prerequisite courses. Check off completed requirements for biology, chemistry, physics, and more. Free prerequisite tracker for pre-med students.',
   keywords: ['medical school prerequisites', 'pre-med requirements', 'med school prerequisite checker', 'pre-med course requirements', 'BCPM courses'],
   openGraph: {
-    title: 'Medical School Prerequisites Checker | MedAtlas',
+    title: 'Medical School Prerequisites Checker | MedStack',
     description: 'Track and verify your medical school prerequisite courses.',
     type: 'website',
   },

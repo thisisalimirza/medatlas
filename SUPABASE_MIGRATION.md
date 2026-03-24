@@ -1,6 +1,6 @@
 # Supabase Migration Guide
 
-This guide will help you migrate MedAtlas from SQLite + custom auth to Supabase.
+This guide will help you migrate MedStack from SQLite + custom auth to Supabase.
 
 ## Prerequisites
 
@@ -127,7 +127,7 @@ After successful migration:
 
 4. **Remove database file**:
    ```bash
-   rm medatlas.db*
+   rm medstack.db*
    ```
 
 ## Troubleshooting

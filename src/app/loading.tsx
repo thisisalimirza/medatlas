@@ -8,7 +8,7 @@ export default function Loading() {
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-red mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading MedAtlas...</p>
+          <p className="text-gray-600">Loading MedStack...</p>
         </div>
       </div>
     </div>

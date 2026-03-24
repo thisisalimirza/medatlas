@@ -177,7 +177,7 @@ export default function HomePage() {
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="text-xl sm:text-2xl">🎉</div>
             <div className="flex-1">
-              <div className="font-semibold text-green-800 text-sm sm:text-base">Welcome to MedAtlas Pro!</div>
+              <div className="font-semibold text-green-800 text-sm sm:text-base">Welcome to MedStack Pro!</div>
               <div className="text-xs sm:text-sm text-green-600">Your payment was successful. You now have full access!</div>
             </div>
             <button 

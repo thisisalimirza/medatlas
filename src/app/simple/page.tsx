@@ -6,7 +6,7 @@ export default function SimplePage() {
       <div className="max-w-md mx-auto text-center">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-4xl mb-4">🏥</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">MedAtlas</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">MedStack</h1>
           <p className="text-gray-600 mb-6">Medical School Discovery Platform</p>
           
           <div className="space-y-3 text-left text-sm">

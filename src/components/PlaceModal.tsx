@@ -826,7 +826,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
                 onClick={() => setIsAuthModalOpen(true)}
                 className="btn-red"
               >
-                Join MedAtlas →
+                Join MedStack →
               </button>
             </div>
           </div>

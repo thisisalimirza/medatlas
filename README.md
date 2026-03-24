@@ -1,4 +1,4 @@
-# MedAtlas 🏥
+# MedStack 🏥
 
 **Medical School & Residency Discovery Platform**
 
@@ -70,8 +70,8 @@ The database is now powered by Supabase PostgreSQL with comprehensive schema:
 
 1. **Clone and install:**
    ```bash
-   git clone https://github.com/thisisalimirza/medatlas.git
-   cd medatlas
+   git clone https://github.com/thisisalimirza/medstack.git
+   cd medstack
    npm install
    ```
 

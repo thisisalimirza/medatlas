@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (error || !place) {
     return {
-      title: 'Place Not Found | MedAtlas',
+      title: 'Place Not Found | MedStack',
       description: 'The requested medical school, residency program, or rotation site could not be found.',
     }
   }
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     descParts.push(`Known for: ${tags.slice(0, 4).join(', ')}.`)
   }
 
-  descParts.push('View stats, reviews, and comparisons on MedAtlas.')
+  descParts.push('View stats, reviews, and comparisons on MedStack.')
 
   const description = descParts.join(' ')
 
@@ -72,14 +72,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   keywords.push(...tags.slice(0, 3))
 
   return {
-    title: `${place.name} - ${typeLabel} in ${location} | MedAtlas`,
+    title: `${place.name} - ${typeLabel} in ${location} | MedStack`,
     description,
     keywords,
     openGraph: {
-      title: `${place.name} - ${typeLabel} | MedAtlas`,
+      title: `${place.name} - ${typeLabel} | MedStack`,
       description,
       type: 'website',
-      siteName: 'MedAtlas',
+      siteName: 'MedStack',
     },
   }
 }

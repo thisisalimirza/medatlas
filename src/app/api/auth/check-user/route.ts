@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
 
     let message = ''
     if (!userExists) {
-      message = 'Create your MedAtlas Pro account to access all features.'
+      message = 'Create your MedStack Pro account to access all features.'
     } else if (!isPaid) {
-      message = 'Upgrade to MedAtlas Pro to access all premium features.'
+      message = 'Upgrade to MedStack Pro to access all premium features.'
     } else {
       message = 'Welcome back! We\'ll send you a secure login link.'
     }

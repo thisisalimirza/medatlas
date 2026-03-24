@@ -1,7 +1,7 @@
 export default function BasicPage() {
   return (
     <div>
-      <h1>🏥 MedAtlas - Basic Test</h1>
+      <h1>🏥 MedStack - Basic Test</h1>
       <p>✅ This page has its own layout with no AuthProvider</p>
       <p>✅ Zero external dependencies</p>
       <p>✅ Pure HTML/CSS only</p>

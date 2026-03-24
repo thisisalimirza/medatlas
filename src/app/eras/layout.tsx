@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'ERAS Application Manager – Timeline, Checklist & Cost Calculator | MedAtlas',
+  title: 'ERAS Application Manager – Timeline, Checklist & Cost Calculator | MedStack',
   description: 'Manage your ERAS residency application with timeline tracking, document checklists, application status management, and cost estimation. Free for medical students.',
   keywords: ['ERAS application manager', 'residency application timeline', 'ERAS cost calculator', 'ERAS checklist', 'residency application tracker', 'ERAS deadlines'],
   openGraph: {
-    title: 'ERAS Application Manager | MedAtlas',
+    title: 'ERAS Application Manager | MedStack',
     description: 'Track your ERAS application timeline, documents, and costs in one place.',
     type: 'website',
   },

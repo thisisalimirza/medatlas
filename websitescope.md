@@ -1,4 +1,4 @@
-MedAtlas — V1 Implementation Blueprint
+MedStack — V1 Implementation Blueprint
 Goal: Recreate the successful Nomad List interaction model for medical professionals (premeds, med students, residents), with SQLite + simple backend.
 
 0) Product framing

@@ -8,12 +8,12 @@ const faqs = [
     category: "Getting Started",
     items: [
       {
-        question: "What is MedAtlas?",
-        answer: "MedAtlas is a comprehensive platform for pre-med students, medical students, residents, and attending physicians. We provide tools, resources, and community features to help you navigate your medical career journey."
+        question: "What is MedStack?",
+        answer: "MedStack is a comprehensive platform for pre-med students, medical students, residents, and attending physicians. We provide tools, resources, and community features to help you navigate your medical career journey."
       },
       {
-        question: "How much does MedAtlas cost?",
-        answer: "MedAtlas Pro is a one-time payment of $99 that provides lifetime access to all premium features, including detailed school reviews, cost calculators, timeline tools, and community features."
+        question: "How much does MedStack cost?",
+        answer: "MedStack Pro is a one-time payment of $99 that provides lifetime access to all premium features, including detailed school reviews, cost calculators, timeline tools, and community features."
       },
       {
         question: "What's included in the free version?",
@@ -43,7 +43,7 @@ const faqs = [
     items: [
       {
         question: "Is there a money-back guarantee?",
-        answer: "Yes! We offer a 30-day money-back guarantee. If you're not satisfied with MedAtlas Pro, contact us within 30 days for a full refund."
+        answer: "Yes! We offer a 30-day money-back guarantee. If you're not satisfied with MedStack Pro, contact us within 30 days for a full refund."
       },
       {
         question: "Can I change my stage (premed, MS1, etc.) later?",
@@ -63,8 +63,8 @@ const faqs = [
         answer: "First, try refreshing the page and clearing your browser cache. If issues persist, check that you're using the correct email address. Contact support if you continue having problems."
       },
       {
-        question: "Can I access MedAtlas on mobile?",
-        answer: "Yes! MedAtlas is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for an even better experience."
+        question: "Can I access MedStack on mobile?",
+        answer: "Yes! MedStack is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for an even better experience."
       },
       {
         question: "How do I report a bug or suggest a feature?",
@@ -96,7 +96,7 @@ export default function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Everything you need to know about MedAtlas
+            Everything you need to know about MedStack
           </p>
           
           {/* Quick Contact */}
@@ -115,7 +115,7 @@ export default function FAQPage() {
                   >
                     community chat
                   </a>
-                  {' '}or email us at help@medatlas.com
+                  {' '}or email us at help@mymedstack.com
                 </p>
               </div>
             </div>
@@ -167,9 +167,9 @@ export default function FAQPage() {
         {/* Contact Section */}
         <div className="mt-12 text-center">
           <div className="bg-brand-red text-white rounded-lg p-8">
-            <h2 className="text-2xl font-bold mb-4">Ready to join MedAtlas?</h2>
+            <h2 className="text-2xl font-bold mb-4">Ready to join MedStack?</h2>
             <p className="text-red-100 mb-6">
-              Join 2,800+ medical students and residents who are already using MedAtlas to navigate their careers.
+              Join 2,800+ medical students and residents who are already using MedStack to navigate their careers.
             </p>
             <button 
               onClick={() => window.location.href = '/?signup=true'}

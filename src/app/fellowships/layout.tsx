@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Fellowship Finder – Medical Fellowship Programs & Comparison | MedAtlas',
+  title: 'Fellowship Finder – Medical Fellowship Programs & Comparison | MedStack',
   description: 'Explore medical fellowship programs across specialties. Compare competitiveness, positions, requirements, and top programs. Browse cardiology, GI, pulm/CC, and more.',
   keywords: ['medical fellowship programs', 'fellowship finder', 'cardiology fellowship', 'GI fellowship', 'fellowship competitiveness', 'subspecialty training'],
   openGraph: {
-    title: 'Fellowship Finder – Medical Fellowships | MedAtlas',
+    title: 'Fellowship Finder – Medical Fellowships | MedStack',
     description: 'Browse and compare medical fellowship programs across all specialties.',
     type: 'website',
   },

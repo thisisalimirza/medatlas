@@ -198,10 +198,10 @@ export default function PublicProfilePage() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-blue-800 font-medium mb-2">Want to connect with {profile.display_name || profile.username}?</p>
             <p className="text-blue-700 text-sm">
-              Join MedAtlas to message other students and share experiences
+              Join MedStack to message other students and share experiences
             </p>
             <a href="/" className="btn-red mt-3 inline-block">
-              Join MedAtlas
+              Join MedStack
             </a>
           </div>
         </div>

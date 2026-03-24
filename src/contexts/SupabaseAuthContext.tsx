@@ -20,6 +20,7 @@ interface AuthContextType {
   session: Session | null
   loading: boolean
   sendMagicLink: (email: string, stage?: string, displayName?: string) => Promise<{ success: boolean; error?: string }>
+  signInWithPassword: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -182,6 +183,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const signInWithPassword = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        return { success: false, error: error.message }
+      }
+      return { success: true }
+    } catch (error) {
+      console.error('Password login error:', error)
+      return { success: false, error: 'Network error' }
+    }
+  }
+
   const logout = async () => {
     try {
       await supabase.auth.signOut()
@@ -212,6 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       session,
       loading,
       sendMagicLink,
+      signInWithPassword,
       logout,
       refreshUser
     }}>

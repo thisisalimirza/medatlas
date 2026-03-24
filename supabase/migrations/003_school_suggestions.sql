@@ -33,7 +33,7 @@ CREATE POLICY "Admins can view all suggestions" ON school_suggestions
     EXISTS (
       SELECT 1 FROM user_profiles 
       WHERE id = auth.uid() 
-      AND email IN ('admin@medatlas.com') -- Add admin emails here
+      AND email IN ('admin@mymedstack.com') -- Add admin emails here
     )
   );
 
@@ -42,7 +42,7 @@ CREATE POLICY "Admins can update all suggestions" ON school_suggestions
     EXISTS (
       SELECT 1 FROM user_profiles 
       WHERE id = auth.uid() 
-      AND email IN ('admin@medatlas.com') -- Add admin emails here
+      AND email IN ('admin@mymedstack.com') -- Add admin emails here
     )
   );
 

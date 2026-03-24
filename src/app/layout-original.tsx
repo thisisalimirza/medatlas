@@ -3,7 +3,7 @@ import './globals.css'
 import { AuthProvider } from '@/contexts/SupabaseAuthContext'
 
 export const metadata: Metadata = {
-  title: 'MedAtlas - Medical School & Residency Explorer',
+  title: 'MedStack - Medical School & Residency Explorer',
   description: 'Filterable, searchable directory of medical schools, rotation sites, and residency programs with community-driven features.',
 }
 

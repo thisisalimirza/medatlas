@@ -43,7 +43,7 @@ export default function MemberMapPage() {
           <div className="text-6xl mb-4">📍</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Member Map</h1>
           <p className="text-xl text-gray-600">
-            Discover MedAtlas members near you and around the world
+            Discover MedStack members near you and around the world
           </p>
         </div>
 
@@ -56,7 +56,7 @@ export default function MemberMapPage() {
             
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Interactive Member Map Coming Soon!</h2>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              We're developing an interactive world map that will show you where MedAtlas members are located, 
+              We're developing an interactive world map that will show you where MedStack members are located, 
               helping you connect with students and physicians in your area.
             </p>
 
@@ -138,7 +138,7 @@ export default function MemberMapPage() {
 
         {/* Current Community Stats */}
         <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="font-semibold text-gray-900 mb-4 text-center">🌎 Current MedAtlas Community</h3>
+          <h3 className="font-semibold text-gray-900 mb-4 text-center">🌎 Current MedStack Community</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4">
               <div className="text-2xl font-bold text-brand-red">2,847+</div>

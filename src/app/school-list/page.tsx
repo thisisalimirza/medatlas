@@ -149,7 +149,7 @@ export default function SchoolListPage() {
               <div className="text-4xl mb-4">⭐</div>
               <h1 className="text-2xl font-bold mb-2">Premium Feature</h1>
               <p className="text-gray-600 mb-6">
-                The School List Builder is available for MedAtlas Pro members. Build smart lists with competitiveness analysis.
+                The School List Builder is available for MedStack Pro members. Build smart lists with competitiveness analysis.
               </p>
               <div className="space-y-3 mb-6 text-left">
                 <div className="flex items-center text-sm text-gray-700">

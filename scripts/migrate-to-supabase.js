@@ -14,7 +14,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
-const dbPath = path.join(process.cwd(), 'medatlas.db')
+const dbPath = path.join(process.cwd(), 'medstack.db')
 const db = new Database(dbPath)
 
 async function migrateData() {

@@ -33,7 +33,7 @@ export default function TestPage() {
       />
       
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-6">🧪 MedAtlas Debug Page</h1>
+        <h1 className="text-3xl font-bold mb-6">🧪 MedStack Debug Page</h1>
         
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Basic Info</h2>

@@ -157,19 +157,19 @@ export default function MainNavigation() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* MedAtlas Menu Button - Logo + hamburger hint */}
+      {/* MedStack Menu Button - Logo + hamburger hint */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center space-x-2 px-2 sm:px-3 py-1.5 rounded-full bg-white border-2 border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
           isOpen ? 'ring-2 ring-brand-red ring-opacity-30 border-brand-red' : 'hover:border-brand-red'
         }`}
-        aria-label="Open MedAtlas Navigation"
+        aria-label="Open MedStack Navigation"
         aria-expanded={isOpen}
       >
         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
           <Image
             src="/logo.png"
-            alt="MedAtlas Logo"
+            alt="MedStack Logo"
             width={32}
             height={32}
             className="object-contain"
@@ -200,7 +200,7 @@ export default function MainNavigation() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 cursor-pointer hover:text-brand-red transition-colors">
                 <span className="text-lg">🌐</span>
-                <span className="font-medium text-gray-900">MedAtlas Tools</span>
+                <span className="font-medium text-gray-900">MedStack Tools</span>
               </div>
               <div className="flex items-center space-x-2 cursor-pointer hover:text-brand-red transition-colors">
                 <span className="text-lg">👋</span>

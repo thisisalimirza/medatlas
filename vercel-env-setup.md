@@ -27,7 +27,7 @@ MEDATLAS_PRICE_CENTS=9900
 ## How to Add in Vercel
 
 1. Go to your Vercel dashboard
-2. Select your MedAtlas project
+2. Select your MedStack project
 3. Navigate to Settings → Environment Variables
 4. Add each variable above with your actual values
 5. Make sure to select "Production", "Preview", and "Development" for each variable
