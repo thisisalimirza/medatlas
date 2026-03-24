@@ -159,37 +159,44 @@ export default function MainNavigation() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* MedAtlas Logo Button */}
+      {/* MedAtlas Menu Button - Logo + hamburger hint */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-12 h-12 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden ${
-          isOpen ? 'ring-4 ring-brand-red ring-opacity-30 scale-105 border-brand-red' : 'hover:border-brand-red'
+        className={`flex items-center space-x-2 px-2 sm:px-3 py-1.5 rounded-full bg-white border-2 border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
+          isOpen ? 'ring-2 ring-brand-red ring-opacity-30 border-brand-red' : 'hover:border-brand-red'
         }`}
         aria-label="Open MedAtlas Navigation"
+        aria-expanded={isOpen}
       >
-        {/* MedAtlas Logo */}
-        <Image
-          src="/logo.png"
-          alt="MedAtlas Logo"
-          width={100}
-          height={100}
-          className="object-contain hover:scale-110 transition-transform duration-200"
-          priority
-          onError={(e) => {
-            // Fallback to simple text if image fails to load
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            const fallback = document.createElement('div');
-            fallback.innerHTML = '🏥';
-            fallback.className = 'text-xl';
-            target.parentNode?.appendChild(fallback);
-          }}
-        />
+        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+          <Image
+            src="/logo.png"
+            alt="MedAtlas Logo"
+            width={32}
+            height={32}
+            className="object-contain"
+            priority
+          />
+        </div>
+        {/* Hamburger icon to signal this is a menu */}
+        <div className="flex flex-col justify-center space-y-1">
+          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-200 ${isOpen ? 'rotate-45 translate-y-[3px]' : ''}`} />
+          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-200 ${isOpen ? 'opacity-0' : ''}`} />
+          <span className={`block w-4 h-0.5 bg-gray-600 rounded-full transition-all duration-200 ${isOpen ? '-rotate-45 -translate-y-[3px]' : ''}`} />
+        </div>
       </button>
 
-      {/* Dropdown Menu - Clean nomad style */}
+      {/* Mobile overlay backdrop - starts below header to not block it */}
       {isOpen && (
-        <div className="absolute top-14 left-0 z-50 w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden max-h-[85vh] overflow-y-auto overscroll-contain">
+        <div
+          className="fixed inset-0 top-14 z-40 bg-black/20 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Dropdown Menu - responsive width */}
+      {isOpen && (
+        <div className="absolute top-14 left-0 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-96 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden max-h-[85vh] overflow-y-auto overscroll-contain">
           {/* Simple Header */}
           <div className="p-4 border-b border-gray-100 bg-gray-50">
             <div className="flex items-center justify-between">
@@ -218,7 +225,7 @@ export default function MainNavigation() {
                   {section.label.toUpperCase()}
                 </h3>
                 <div className="grid grid-cols-1 gap-1">
-                  {section.items.slice(0, 6).map((item) => (
+                  {section.items.map((item) => (
                     <div
                       key={item.href}
                       onClick={() => handleItemClick(item)}

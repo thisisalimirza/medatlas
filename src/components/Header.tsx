@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import AuthModal from './AuthModal'
 import MainNavigation from './MainNavigation'
@@ -16,8 +16,27 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup')
   const { user, logout, loading, refreshUser } = useAuth()
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
-  // Auth loading should resolve automatically now with improved context
+  // Close user menu on click outside or Escape
+  useEffect(() => {
+    if (!isUserMenuOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsUserMenuOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [isUserMenuOpen])
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -84,9 +103,13 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                   <span className="group-hover:scale-110 transition-transform inline-block text-lg">🔔</span>
                 </button>
 
-                {/* Simplified User Profile */}
-                <div className="relative group">
-                  <button className="flex items-center space-x-1 sm:space-x-2 p-1 rounded-lg hover:bg-gray-50 transition-colors">
+                {/* User Profile - click-based dropdown */}
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center space-x-1 sm:space-x-2 p-1 rounded-lg hover:bg-gray-50 transition-colors"
+                    aria-expanded={isUserMenuOpen}
+                  >
                     <div className="w-8 h-8 sm:w-9 sm:h-9 bg-brand-red rounded-full flex items-center justify-center text-white text-sm font-medium">
                       {user.display_name ? user.display_name[0].toUpperCase() : user.email[0].toUpperCase()}
                     </div>
@@ -95,13 +118,14 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                         {user.display_name || user.email.split('@')[0]}
                       </div>
                     </div>
-                    <div className="text-gray-400 hidden sm:block">
+                    <div className={`text-gray-400 hidden sm:block transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}>
                       ⌄
                     </div>
                   </button>
 
-                  {/* Simplified Dropdown Menu */}
-                  <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  {/* Dropdown Menu - click-toggled */}
+                  {isUserMenuOpen && (
+                  <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
                     <div className="p-3 border-b border-gray-100">
                       <div className="text-sm font-medium text-gray-900 truncate">
                         {user.display_name || user.email}
@@ -111,15 +135,15 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                       </div>
                     </div>
                     <div className="py-1">
-                      <a href="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
+                      <a href="/profile" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
                         <span className="mr-3 group-hover:scale-110 transition-transform">👤</span>
                         My Profile
                       </a>
-                      <a href="/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
+                      <a href="/dashboard" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
                         <span className="mr-3 group-hover:scale-110 transition-transform">📊</span>
                         Dashboard
                       </a>
-                      <a href="/favorites" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
+                      <a href="/favorites" onClick={() => setIsUserMenuOpen(false)} className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-brand-red transition-all duration-200 group">
                         <span className="mr-3 group-hover:scale-110 transition-transform">❤️</span>
                         Favorites
                       </a>
@@ -145,6 +169,7 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
                       </button>
                     </div>
                   </div>
+                  )}
                 </div>
               </div>
             ) : (

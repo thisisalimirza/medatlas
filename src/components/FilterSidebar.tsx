@@ -5,9 +5,10 @@ import { useState } from 'react'
 interface FilterSidebarProps {
   onFiltersChange: (filters: any) => void
   currentFilters: any
+  onClose?: () => void
 }
 
-export default function FilterSidebar({ onFiltersChange, currentFilters }: FilterSidebarProps) {
+export default function FilterSidebar({ onFiltersChange, currentFilters, onClose }: FilterSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
   const handleFilterChange = (key: string, value: any) => {
@@ -175,7 +176,7 @@ export default function FilterSidebar({ onFiltersChange, currentFilters }: Filte
   ]
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 h-screen sticky top-0 overflow-y-auto overscroll-contain">
+    <div className="w-[85vw] max-w-80 md:w-80 bg-white border-r border-gray-200 h-screen sticky top-0 overflow-y-auto overscroll-contain">
       {/* Filter Header */}
       <div className="p-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
@@ -183,12 +184,24 @@ export default function FilterSidebar({ onFiltersChange, currentFilters }: Filte
             <span>🔧</span>
             <span>Filters</span>
           </h2>
-          <button
-            onClick={() => onFiltersChange({})}
-            className="text-xs text-brand-red hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded font-medium transition-all duration-200"
-          >
-            Clear all
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onFiltersChange({})}
+              className="text-xs text-brand-red hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded font-medium transition-all duration-200"
+            >
+              Clear all
+            </button>
+            {/* Close button - visible on mobile */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="md:hidden p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Close filters"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

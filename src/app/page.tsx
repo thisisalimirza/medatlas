@@ -17,7 +17,7 @@ export default function HomePage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isComparisonOpen, setIsComparisonOpen] = useState(false)
-  const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(true) // Default open
+  const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(false) // Default closed; users open via filter button
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
   const [isFiltering, setIsFiltering] = useState(false)
 
@@ -200,18 +200,19 @@ export default function HomePage() {
       <div className="flex relative">
         {/* Mobile Sidebar Overlay */}
         {isFiltersSidebarOpen && (
-          <div 
-            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          <div
+            className="md:hidden fixed inset-0 top-14 bg-black/50 z-30"
             onClick={() => setIsFiltersSidebarOpen(false)}
           />
         )}
-        
+
         {/* Sidebar - Conditionally shown */}
         {isFiltersSidebarOpen && (
-          <div className="fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
-            <FilterSidebar 
+          <div className="fixed md:relative top-14 sm:top-16 md:top-0 bottom-0 left-0 z-30 md:z-auto">
+            <FilterSidebar
               onFiltersChange={handleFiltersChange}
               currentFilters={filters}
+              onClose={() => setIsFiltersSidebarOpen(false)}
             />
           </div>
         )}
