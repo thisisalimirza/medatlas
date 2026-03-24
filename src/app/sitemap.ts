@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { getAllRankingPages } from '@/lib/rankings-data'
 
 const BASE_URL = 'https://mymedstack.com'
 
@@ -77,5 +78,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching places for sitemap:', error)
   }
 
-  return [...staticPages, ...placePages]
+  // Programmatic SEO ranking pages (state, region, feature pages)
+  const rankingPages: MetadataRoute.Sitemap = getAllRankingPages().map(page => ({
+    url: `${BASE_URL}/rankings/${page.slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }))
+
+  return [...staticPages, ...placePages, ...rankingPages]
 }
