@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { AuthProvider } from '@/contexts/SupabaseAuthContext'
 import SEOFooter from '@/components/SEOFooter'
+import ClarityAnalytics from '@/components/ClarityAnalytics'
 
 export const metadata: Metadata = {
   title: {
@@ -127,6 +128,7 @@ export default function RootLayout({
       </head>
       <body>
         <AuthProvider>
+          <ClarityAnalytics />
           {children}
           <SEOFooter />
         </AuthProvider>
