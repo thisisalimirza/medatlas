@@ -128,8 +128,8 @@ export default function FilterSidebar({ onFiltersChange, currentFilters, onClose
           options: [
             { label: 'Public', value: 'public' },
             { label: 'Private', value: 'private' },
-            { label: 'Research University', value: 'research' },
-            { label: 'Teaching Focused', value: 'teaching' }
+            { label: 'Research-Heavy', value: 'research' },
+            { label: 'Community-Focused', value: 'teaching' }
           ]
         },
         {

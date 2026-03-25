@@ -151,27 +151,49 @@ export default function HomePage() {
       }
     }
     
-    // Financial aid filter
-    if (filters.financial_aid && !(place.metrics as any)?.financial_aid) return false
+    // Financial aid filter — proxy: free tuition (metrics.financial_aid not yet in DB)
+    if (filters.financial_aid) {
+      const tuition = (place.metrics as any)?.tuition ?? place.tuition_in_state ?? null
+      if (!((place.metrics as any)?.financial_aid || tuition === 0)) return false
+    }
 
     // IMG friendly filter
     if (filters.img_friendly && !place.img_friendly) return false
-    
+
     // Location type filter
     if (filters.location_type && !place.tags.includes(filters.location_type)) return false
-    
-    // Institution type filter
-    if (filters.institution_type && !place.tags.includes(filters.institution_type)) return false
-    
-    // Region filter
-    if (filters.region && !place.tags.includes(filters.region)) return false
-    
-    // Specialization filters (these would typically be based on place.tags or metrics)
-    if (filters.strong_research && !place.tags.includes('research-focused')) return false
-    if (filters.primary_care && !place.tags.includes('primary-care')) return false
-    if (filters.rural_medicine && !place.tags.includes('rural-medicine')) return false
-    if (filters.small_class && place.metrics.class_size && place.metrics.class_size >= 100) return false
-    if (filters.highly_rated && place.scores.community_score < 8) return false
+
+    // Institution type filter — map UI values to actual tags in DB
+    if (filters.institution_type) {
+      const tagMap: Record<string, string> = {
+        public: 'public',
+        private: 'private',
+        research: 'research-heavy',
+        teaching: 'community-focused',
+      }
+      const tag = tagMap[filters.institution_type] || filters.institution_type
+      if (!place.tags.includes(tag)) return false
+    }
+
+    // Region filter — derive from state (no region tags in DB)
+    if (filters.region) {
+      const regionMap: Record<string, string[]> = {
+        northeast: ['ME','NH','VT','MA','RI','CT','NY','NJ','PA','MD','DE','DC'],
+        southeast: ['VA','WV','NC','SC','GA','FL','AL','MS','TN','KY','LA','AR'],
+        midwest:   ['OH','IN','IL','MI','WI','MN','IA','MO','ND','SD','NE','KS'],
+        southwest: ['TX','OK','NM','AZ'],
+        west:      ['CA','OR','WA','ID','MT','WY','CO','UT','NV','AK','HI'],
+      }
+      const states = regionMap[filters.region] || []
+      if (!states.includes(place.state)) return false
+    }
+
+    // Specialization filters — use actual tags present in DB
+    if (filters.strong_research && !place.tags.includes('research-heavy')) return false
+    if (filters.primary_care && !place.tags.includes('community-focused')) return false
+    if (filters.rural_medicine && !place.tags.includes('rural')) return false
+    // small_class: class_size not in DB yet — skip to avoid blocking all results
+    if (filters.highly_rated && (place.scores.community_score ?? 0) < 8) return false
     
     return true
   })

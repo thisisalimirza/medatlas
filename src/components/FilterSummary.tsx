@@ -58,8 +58,8 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
       institution_type: {
         'public': 'Public',
         'private': 'Private',
-        'research': 'Research University',
-        'teaching': 'Teaching Focused'
+        'research': 'Research-Heavy',
+        'teaching': 'Community-Focused'
       },
       region: {
         'northeast': 'Northeast',
