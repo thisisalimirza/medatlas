@@ -230,6 +230,7 @@ export default function HomePage() {
         <FilterSummary
           filters={filters}
           onFilterChange={(key, value) => setFilters({...filters, [key]: value})}
+          onFiltersChange={setFilters}
           onClearFilters={() => setFilters({})}
           resultsCount={filteredPlaces.length}
         />
