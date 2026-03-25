@@ -220,19 +220,19 @@ export default function ContractAnalyzerPage() {
                     className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => setExpandedClause(expandedClause === clause.id ? null : clause.id)}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className={`flex-shrink-0 px-2 py-0.5 rounded text-xs font-bold ${
                           clause.importance === 'critical' ? 'bg-red-100 text-red-700' :
                           clause.importance === 'important' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-gray-100 text-gray-600'
                         }`}>
                           {clause.importance.toUpperCase()}
                         </span>
-                        <h3 className="font-bold text-gray-900">{clause.name}</h3>
+                        <h3 className="font-bold text-gray-900 truncate">{clause.name}</h3>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className={`hidden sm:inline text-xs px-2 py-0.5 rounded-full ${
                           clause.negotiable === 'high' ? 'bg-green-100 text-green-700' :
                           clause.negotiable === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                           'bg-gray-100 text-gray-600'

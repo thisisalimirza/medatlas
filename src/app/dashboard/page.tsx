@@ -161,17 +161,17 @@ export default function Dashboard() {
       <PremiumGate featureName="My Dashboard" previewHeight={400}>
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
-              <p className="text-gray-600 mt-1">Track your applications and manage your favorites</p>
+        <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Dashboard</h1>
+              <p className="text-gray-500 mt-0.5 text-sm hidden sm:block">Track your applications and manage your favorites</p>
             </div>
             <button
               onClick={() => router.push('/')}
-              className="btn-outline"
+              className="btn-outline btn-sm flex-shrink-0"
             >
-              Back to Explore
+              ← Explore
             </button>
           </div>
         </div>
@@ -249,7 +249,7 @@ export default function Dashboard() {
           ) : (
             <div className="divide-y divide-gray-200">
               {favorites.map((favorite) => (
-                <div key={favorite.favorite_id} className="p-6">
+                <div key={favorite.favorite_id} className="p-4 sm:p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       {/* School Header */}
