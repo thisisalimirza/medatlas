@@ -132,7 +132,7 @@ export default function HomePage() {
     
     // Tuition range filter
     if (filters.tuition_range) {
-      const tuition = place.tuition_in_state || place.tuition_out_state || 0
+      const tuition = place.tuition_in_state ?? place.tuition_out_state ?? null
       const range = [
         { value: 'free', min: 0, max: 0 },
         { value: 'low', min: 0, max: 20000 },
@@ -140,10 +140,13 @@ export default function HomePage() {
         { value: 'high', min: 40000, max: 60000 },
         { value: 'very-high', min: 60000, max: 999999 }
       ].find(r => r.value === filters.tuition_range)
-      
+
       if (range) {
-        if (range.value === 'free' && tuition !== 0) return false
-        if (range.value !== 'free' && (tuition < range.min || tuition > range.max)) return false
+        if (range.value === 'free') {
+          if (tuition !== 0) return false
+        } else {
+          if (tuition === null || tuition < range.min || tuition > range.max) return false
+        }
       }
     }
     
