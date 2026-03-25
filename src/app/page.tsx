@@ -217,11 +217,11 @@ export default function HomePage() {
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Page Header */}
-          <div className="bg-white border-b border-gray-200 p-3 sm:p-4 md:p-6">
+          {/* Page Header — scrolls away */}
+          <div className="bg-white p-3 sm:p-4 md:p-6 pb-0 sm:pb-0 md:pb-0">
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div className="mb-4 md:mb-0">
+                <div className="mb-2 md:mb-0">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center space-x-2 sm:space-x-3">
                     <span>🏥</span>
                     <span>Medical Schools & Programs</span>
@@ -232,7 +232,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Stats - Show on mobile as horizontal row */}
-                <div className="flex md:hidden items-center justify-between space-x-4 mb-2">
+                <div className="flex md:hidden items-center space-x-4 mt-2 mb-1">
                   <div className="text-center">
                     <div className="text-sm font-bold text-brand-red">208+</div>
                     <div className="text-xs text-gray-500">Programs</div>
@@ -255,9 +255,13 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Search Bar and Filter Toggle */}
-              <div className="flex items-center gap-2 sm:gap-3 mt-4">
+          {/* Sticky Search + Filter Bar */}
+          <div className="sticky top-14 sm:top-16 z-30 bg-white border-b border-gray-200 shadow-sm">
+            <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setIsFiltersSidebarOpen(!isFiltersSidebarOpen)}
                   className={`flex-shrink-0 flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg border ${
@@ -281,15 +285,14 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+            {/* Filter Summary lives inside the sticky bar */}
+            <FilterSummary
+              filters={filters}
+              onFilterChange={(key, value) => handleFiltersChange({...filters, [key]: value})}
+              onClearFilters={() => handleFiltersChange({})}
+              resultsCount={filteredPlaces.length}
+            />
           </div>
-
-        {/* Filter Summary */}
-        <FilterSummary
-          filters={filters}
-          onFilterChange={(key, value) => handleFiltersChange({...filters, [key]: value})}
-          onClearFilters={() => handleFiltersChange({})}
-          resultsCount={filteredPlaces.length}
-        />
 
           {/* Content Area */}
           <div className="p-3 sm:p-4 md:p-6">
