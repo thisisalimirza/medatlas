@@ -864,14 +864,14 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
           </div>
 
           {/* Title Section */}
-          <div className="px-6 pt-4 pb-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+          <div className="px-3 sm:px-6 pt-3 pb-3 sm:pt-4 sm:pb-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center min-w-0">
                 {user && user.is_paid && (
                   <button
                     onClick={toggleFavorite}
                     disabled={favoritesLoading}
-                    className={`p-2 rounded-full transition-all duration-200 hover:bg-red-50 group ${
+                    className={`p-2 rounded-full transition-all duration-200 hover:bg-red-50 group flex-shrink-0 ${
                       isFavorited
                         ? 'text-red-500 hover:text-red-600'
                         : 'text-gray-400 hover:text-red-500'
@@ -884,59 +884,59 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
                   </button>
                 )}
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {!user ? (
-                  <button 
+                  <button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-brand-red hover:bg-red-600 text-white font-medium px-4 py-2 rounded-full text-sm transition-colors"
+                    className="bg-brand-red hover:bg-red-600 text-white font-medium px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm transition-colors whitespace-nowrap"
                   >
-                    Join community in {place.city}
+                    Join in {place.city}
                   </button>
                 ) : !user.is_paid ? (
-                  <button 
+                  <button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-brand-red hover:bg-red-600 text-white font-medium px-4 py-2 rounded-full text-sm transition-colors"
+                    className="bg-brand-red hover:bg-red-600 text-white font-medium px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm transition-colors whitespace-nowrap"
                   >
                     Upgrade to Pro
                   </button>
                 ) : (
                   <>
                     {!isInSchoolList ? (
-                      <button 
+                      <button
                         onClick={() => setShowSchoolListModal(true)}
                         disabled={schoolListLoading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-full text-sm transition-colors disabled:opacity-50"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm transition-colors disabled:opacity-50 whitespace-nowrap"
                       >
-                        {schoolListLoading ? '⏳' : '📋 Add to School List'}
+                        {schoolListLoading ? '⏳' : '📋 Add to List'}
                       </button>
                     ) : (
-                      <div className="bg-blue-50 text-blue-700 font-medium px-3 py-1 rounded-full text-sm">
-                        ✓ In School List
+                      <div className="bg-blue-50 text-blue-700 font-medium px-2 py-1 rounded-full text-xs sm:text-sm whitespace-nowrap">
+                        ✓ In List
                       </div>
                     )}
-                    <div className="bg-green-50 text-green-700 font-medium px-3 py-1 rounded-full text-sm">
+                    <div className="hidden sm:block bg-green-50 text-green-700 font-medium px-3 py-1 rounded-full text-sm whitespace-nowrap">
                       ✓ Pro Member
                     </div>
                   </>
                 )}
-                <button 
+                <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 group"
+                  className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 group flex-shrink-0"
                 >
                   <span className="text-xl group-hover:scale-110 transition-transform inline-block">×</span>
                 </button>
               </div>
             </div>
           </div>
-          
-          {/* Tabs - Cleaner design */}
-          <div className="px-6">
-            <div className="flex overflow-x-auto border-b border-gray-200">
+
+          {/* Tabs - scrollable on mobile */}
+          <div className="px-2 sm:px-6">
+            <div className="flex overflow-x-auto border-b border-gray-200 scrollbar-hide">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`relative whitespace-nowrap px-4 py-3 transition-all duration-200 font-medium text-sm group ${
+                  className={`relative whitespace-nowrap px-3 sm:px-4 py-3 transition-all duration-200 font-medium text-xs sm:text-sm group flex-shrink-0 ${
                     activeTab === tab.id
                       ? 'text-brand-red border-b-2 border-brand-red -mb-px'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
