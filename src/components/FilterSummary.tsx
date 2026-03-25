@@ -10,7 +10,7 @@ interface FilterSummaryProps {
   resultsCount: number
 }
 
-export default function FilterSummary({ filters, onFilterChange, onClearFilters, resultsCount }: FilterSummaryProps) {
+export default function FilterSummary({ filters, onFilterChange, onFiltersChange, onClearFilters, resultsCount }: FilterSummaryProps) {
   const { user } = useAuth()
   
   const activeFilters = Object.entries(filters).filter(([key, value]) => 

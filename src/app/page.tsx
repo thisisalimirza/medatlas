@@ -315,6 +315,7 @@ export default function HomePage() {
             <FilterSummary
               filters={filters}
               onFilterChange={(key, value) => handleFiltersChange({...filters, [key]: value})}
+              onFiltersChange={handleFiltersChange}
               onClearFilters={() => handleFiltersChange({})}
               resultsCount={filteredPlaces.length}
             />
