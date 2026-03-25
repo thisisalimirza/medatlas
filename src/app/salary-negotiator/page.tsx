@@ -141,7 +141,7 @@ export default function SalaryNegotiatorPage() {
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 -mt-4">
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {tabs.map(tab => (
             <button
               key={tab.key}

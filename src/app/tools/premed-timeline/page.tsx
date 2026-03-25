@@ -442,7 +442,7 @@ export default function PremedTimelinePage() {
               </select>
             </div>
 
-            <div className="flex items-end space-x-2">
+            <div className="flex items-end gap-2">
               <button
                 onClick={exportToPDF}
                 className="flex-1 btn-outline text-sm"
@@ -453,7 +453,7 @@ export default function PremedTimelinePage() {
                 onClick={exportToNotion}
                 className="flex-1 btn-red text-sm"
               >
-                📋 Copy to Notion
+                📋 Notion
               </button>
             </div>
           </div>
@@ -476,11 +476,11 @@ export default function PremedTimelinePage() {
         <div className="space-y-8">
           {timeline.map((year) => (
             <div key={year.year} className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
+              <div className="flex items-start sm:items-center justify-between mb-6 gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
                   {year.label} ({year.year}-{year.year + 1})
                 </h3>
-                <div className="text-sm text-gray-500">
+                <div className="text-xs sm:text-sm text-gray-500 flex-shrink-0">
                   {[...year.fall, ...year.spring, ...year.summer].filter(item => completedItems.has(item.id)).length}/
                   {year.fall.length + year.spring.length + year.summer.length} completed
                 </div>
