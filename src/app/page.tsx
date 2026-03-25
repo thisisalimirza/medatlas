@@ -132,7 +132,8 @@ export default function HomePage() {
     
     // Tuition range filter
     if (filters.tuition_range) {
-      const tuition = place.tuition_in_state ?? place.tuition_out_state ?? null
+      // metrics.tuition is the primary field; tuition_in_state/out_state are aliases
+      const tuition = place.tuition_in_state ?? place.tuition_out_state ?? (place.metrics as any)?.tuition ?? null
       const range = [
         { value: 'free', min: 0, max: 0 },
         { value: 'low', min: 0, max: 20000 },
@@ -199,14 +200,14 @@ export default function HomePage() {
         {/* Sidebar Overlay — click to close on all screen sizes */}
         {isFiltersSidebarOpen && (
           <div
-            className="fixed inset-0 top-14 sm:top-16 bg-black/30 z-20 md:bg-transparent md:pointer-events-none"
+            className="fixed inset-0 bg-black/30 z-40 md:bg-transparent md:pointer-events-none"
             onClick={() => setIsFiltersSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar - Conditionally shown */}
         {isFiltersSidebarOpen && (
-          <div className="fixed md:relative top-14 sm:top-16 md:top-0 bottom-0 left-0 z-30 md:z-auto">
+          <div className="fixed md:relative top-0 bottom-0 left-0 z-50 md:z-auto">
             <FilterSidebar
               onFiltersChange={handleFiltersChange}
               currentFilters={filters}
@@ -279,7 +280,7 @@ export default function HomePage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search schools by name, city, or state..."
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-sm"
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-base sm:text-sm"
                   />
                   <div className="absolute right-3 top-2.5 text-gray-400 text-sm">🔍</div>
                 </div>
