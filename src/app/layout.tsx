@@ -3,6 +3,7 @@ import './globals.css'
 import { AuthProvider } from '@/contexts/SupabaseAuthContext'
 import SEOFooter from '@/components/SEOFooter'
 import ClarityAnalytics from '@/components/ClarityAnalytics'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: {
@@ -132,6 +133,7 @@ export default function RootLayout({
           {children}
           <SEOFooter />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   )
