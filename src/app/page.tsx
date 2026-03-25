@@ -190,12 +190,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <Header 
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        isFiltersSidebarOpen={isFiltersSidebarOpen}
-        onToggleFiltersSidebar={() => setIsFiltersSidebarOpen(!isFiltersSidebarOpen)}
-      />
+      <Header />
       
       <div className="flex relative">
         {/* Sidebar Overlay — click to close on all screen sizes */}
@@ -232,7 +227,7 @@ export default function HomePage() {
                     Find your path to becoming a physician • Real insights from current students & residents
                   </p>
                 </div>
-                
+
                 {/* Stats - Show on mobile as horizontal row */}
                 <div className="flex md:hidden items-center justify-between space-x-4 mb-2">
                   <div className="text-center">
@@ -244,7 +239,7 @@ export default function HomePage() {
                     <div className="text-xs text-gray-500">States</div>
                   </div>
                 </div>
-                
+
                 {/* Stats - Desktop version */}
                 <div className="hidden md:flex items-center space-x-6">
                   <div className="text-center">
@@ -255,6 +250,31 @@ export default function HomePage() {
                     <div className="text-lg font-bold text-brand-red">50+</div>
                     <div className="text-xs text-gray-500">States Covered</div>
                   </div>
+                </div>
+              </div>
+
+              {/* Search Bar and Filter Toggle */}
+              <div className="flex items-center gap-2 sm:gap-3 mt-4">
+                <button
+                  onClick={() => setIsFiltersSidebarOpen(!isFiltersSidebarOpen)}
+                  className={`flex-shrink-0 flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg border ${
+                    isFiltersSidebarOpen
+                      ? 'bg-brand-red text-white border-brand-red'
+                      : 'text-brand-red border-brand-red hover:bg-red-50'
+                  }`}
+                >
+                  <span>🔧</span>
+                  <span className="hidden sm:inline">{isFiltersSidebarOpen ? 'Hide Filters' : 'Filters'}</span>
+                </button>
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search schools by name, city, or state..."
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-sm"
+                  />
+                  <div className="absolute right-3 top-2.5 text-gray-400 text-sm">🔍</div>
                 </div>
               </div>
             </div>

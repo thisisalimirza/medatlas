@@ -182,12 +182,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <Header 
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        isFiltersSidebarOpen={isFiltersSidebarOpen}
-        onToggleFiltersSidebar={() => setIsFiltersSidebarOpen(!isFiltersSidebarOpen)}
-      />
+      <Header />
       
       <div className="flex">
         {/* Sidebar - Conditionally shown */}

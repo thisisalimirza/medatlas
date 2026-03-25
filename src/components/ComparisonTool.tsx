@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/SupabaseAuthContext'
 
 interface Place {
   id: number
@@ -26,11 +25,20 @@ interface ComparisonToolProps {
 }
 
 export default function ComparisonTool({ isOpen, onClose, initialPlaces = [] }: ComparisonToolProps) {
-  const { user } = useAuth()
   const [selectedPlaces, setSelectedPlaces] = useState<Place[]>(initialPlaces)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Place[]>([])
   const [loading, setLoading] = useState(false)
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
 
   useEffect(() => {
     if (searchQuery.length >= 2) {
@@ -89,44 +97,10 @@ export default function ComparisonTool({ isOpen, onClose, initialPlaces = [] }: 
 
   if (!isOpen) return null
 
-  // Require authentication for comparison tool
-  if (!user || !user.is_paid) {
-    return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content max-w-md" onClick={(e) => e.stopPropagation()}>
-          <div className="p-6 text-center">
-            <div className="text-4xl mb-4">📊</div>
-            <h2 className="text-xl font-bold mb-2">Program Comparison</h2>
-            <p className="text-gray-600 mb-6">
-              Compare up to 5 medical schools side-by-side with detailed metrics and insights
-            </p>
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center text-sm text-gray-700">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Side-by-side comparison of key metrics</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Tuition, MCAT, GPA, and acceptance rates</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <span className="text-green-500 mr-2">✓</span>
-                <span>Match rates and board pass rates</span>
-              </div>
-            </div>
-            <button onClick={onClose} className="btn-red w-full">
-              Upgrade to Access
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content max-w-7xl" onClick={(e) => e.stopPropagation()}>
-        <div className="bg-white">
+        <div className="bg-white overflow-y-auto flex-1">
           {/* Header */}
           <div className="border-b border-gray-200 p-6">
             <div className="flex items-center justify-between">

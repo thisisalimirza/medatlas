@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { getAllRankingPages } from '@/lib/rankings-data'
+import { makeComparisonSlug } from '@/lib/comparisons-data'
 
 const BASE_URL = 'https://mymedstack.com'
 
@@ -86,5 +87,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  return [...staticPages, ...placePages, ...rankingPages]
+  // Comparison pages (top 30 schools = 435 "vs" pages)
+  let comparisonPages: MetadataRoute.Sitemap = []
+  try {
+    const { data: topSchools } = await supabaseAdmin
+      .from('places')
+      .select('slug')
+      .eq('type', 'school')
+      .not('rank_overall', 'is', null)
+      .order('rank_overall', { ascending: true })
+      .limit(30)
+
+    if (topSchools) {
+      for (let i = 0; i < topSchools.length; i++) {
+        for (let j = i + 1; j < topSchools.length; j++) {
+          comparisonPages.push({
+            url: `${BASE_URL}/vs/${makeComparisonSlug(topSchools[i].slug, topSchools[j].slug)}`,
+            lastModified: now,
+            changeFrequency: 'monthly' as const,
+            priority: 0.7,
+          })
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error generating comparison pages for sitemap:', error)
+  }
+
+  return [...staticPages, ...placePages, ...rankingPages, ...comparisonPages]
 }

@@ -4,6 +4,7 @@ import { Place } from '@/types'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { authFetch } from '@/lib/supabase'
 import AuthModal from './AuthModal'
 import ReviewForm from './ReviewForm'
 
@@ -107,7 +108,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
   const checkIfFavorited = async () => {
     if (!place) return
     try {
-      const response = await fetch('/api/favorites')
+      const response = await authFetch('/api/favorites')
       const data = await response.json()
       if (data.success) {
         const favoriteExists = data.data.some((fav: any) => fav.place.id === place.id)
@@ -125,7 +126,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
     try {
       if (isFavorited) {
         // Remove from favorites
-        const response = await fetch(`/api/favorites?place_id=${place.id}`, {
+        const response = await authFetch(`/api/favorites?place_id=${place.id}`, {
           method: 'DELETE'
         })
         if (response.ok) {
@@ -133,7 +134,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
         }
       } else {
         // Add to favorites
-        const response = await fetch('/api/favorites', {
+        const response = await authFetch('/api/favorites', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ place_id: place.id })

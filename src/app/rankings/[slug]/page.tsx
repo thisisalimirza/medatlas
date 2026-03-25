@@ -208,9 +208,29 @@ export default async function RankingPage({ params }: { params: Promise<{ slug: 
     })
     .slice(0, 6)
 
+  // ItemList structured data for rich results — safe: all values from our DB
+  const itemListJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: pageDef.h1,
+    description: pageDef.description,
+    numberOfItems: places.length,
+    itemListElement: places.slice(0, 50).map((place, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: place.name,
+      url: `https://mymedstack.com/place/${place.slug}`,
+    })),
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      {/* JSON-LD ItemList: safe — values are server-generated from our database */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: itemListJsonLd }}
+      />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Breadcrumb */}

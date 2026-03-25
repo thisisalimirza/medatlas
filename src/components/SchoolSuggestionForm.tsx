@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { authFetch } from '@/lib/supabase'
 
 interface SchoolSuggestionFormProps {
   schoolType: 'undergraduate' | 'medical'
@@ -30,7 +31,7 @@ export default function SchoolSuggestionForm({
     setError('')
 
     try {
-      const response = await fetch('/api/school-suggestions', {
+      const response = await authFetch('/api/school-suggestions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

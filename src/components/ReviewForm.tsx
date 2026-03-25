@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
+import { authFetch } from '@/lib/supabase'
 
 interface ReviewFormProps {
   placeId: number
@@ -56,7 +57,7 @@ export default function ReviewForm({ placeId, placeName, onSuccess, existingRevi
     }
 
     try {
-      const response = await fetch('/api/reviews', {
+      const response = await authFetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

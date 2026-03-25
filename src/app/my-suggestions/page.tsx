@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
+import { authFetch } from '@/lib/supabase'
 
 interface SchoolSuggestion {
   id: number
@@ -40,7 +41,7 @@ export default function MySuggestionsPage() {
   const fetchSuggestions = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/school-suggestions')
+      const response = await authFetch('/api/school-suggestions')
       const data = await response.json()
 
       if (data.success) {

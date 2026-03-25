@@ -74,6 +74,7 @@
     padding: 1rem;
     animation: fadeIn 0.2s ease-out;
     overscroll-behavior: contain;
+    overflow: hidden;
   }
   
   .modal-content {

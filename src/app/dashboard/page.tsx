@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/SupabaseAuthContext'
 import { useRouter } from 'next/navigation'
 import PremiumGate from '@/components/PremiumGate'
+import { authFetch } from '@/lib/supabase'
 
 interface Favorite {
   favorite_id: number
@@ -47,7 +48,7 @@ export default function Dashboard() {
 
   const fetchFavorites = async () => {
     try {
-      const response = await fetch('/api/favorites')
+      const response = await authFetch('/api/favorites')
       const data = await response.json()
       
       if (data.success) {
@@ -62,7 +63,7 @@ export default function Dashboard() {
 
   const updateFavorite = async (placeId: number, notes?: string, deadline?: string) => {
     try {
-      const response = await fetch('/api/favorites', {
+      const response = await authFetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,7 +83,7 @@ export default function Dashboard() {
 
   const removeFavorite = async (placeId: number) => {
     try {
-      const response = await fetch(`/api/favorites?place_id=${placeId}`, {
+      const response = await authFetch(`/api/favorites?place_id=${placeId}`, {
         method: 'DELETE'
       })
 

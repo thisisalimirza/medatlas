@@ -5,14 +5,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext'
 import AuthModal from './AuthModal'
 import MainNavigation from './MainNavigation'
 
-interface HeaderProps {
-  searchQuery?: string
-  onSearchChange?: (query: string) => void
-  isFiltersSidebarOpen?: boolean
-  onToggleFiltersSidebar?: () => void
-}
-
-export default function Header({ searchQuery = '', onSearchChange, isFiltersSidebarOpen, onToggleFiltersSidebar }: HeaderProps) {
+export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup')
   const { user, logout, loading, refreshUser } = useAuth()
@@ -42,51 +35,9 @@ export default function Header({ searchQuery = '', onSearchChange, isFiltersSide
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
-          {/* Left side - Navigation and Filters */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          {/* Left side - Navigation */}
+          <div className="flex items-center">
             <MainNavigation />
-            <div className="hidden md:block h-6 w-px bg-gray-300"></div>
-            
-            {/* Filter button - mobile version */}
-            <button 
-              onClick={onToggleFiltersSidebar}
-              className={`md:hidden p-2 transition-colors rounded-lg ${
-                isFiltersSidebarOpen 
-                  ? 'bg-brand-red text-white' 
-                  : 'text-brand-red hover:bg-red-50'
-              }`}
-            >
-              <span className="text-lg">🔧</span>
-            </button>
-            
-            {/* Filter button - desktop version */}
-            <button 
-              onClick={onToggleFiltersSidebar}
-              className={`hidden md:flex border items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg ${
-                isFiltersSidebarOpen 
-                  ? 'bg-brand-red text-white border-brand-red' 
-                  : 'text-brand-red border-brand-red hover:bg-red-50'
-              }`}
-            >
-              <span>🔧</span>
-              <span>{isFiltersSidebarOpen ? 'Hide Filters' : 'Show Filters'}</span>
-            </button>
-          </div>
-
-          {/* Search Bar (Center on desktop, full width on mobile) */}
-          <div className="flex-1 max-w-lg mx-2 sm:mx-4 md:mx-8">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => onSearchChange?.(e.target.value)}
-                placeholder="Search schools..."
-                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 pr-8 sm:pr-10 border border-gray-300 rounded-full focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-sm placeholder:text-xs sm:placeholder:text-sm"
-              />
-              <div className="absolute right-2 sm:right-3 top-2 sm:top-3 text-gray-400 text-sm">
-                🔍
-              </div>
-            </div>
           </div>
 
           {/* Right side - User Menu */}

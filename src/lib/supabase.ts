@@ -21,6 +21,20 @@ const createSupabaseClient = () => {
 
 export const supabase = createSupabaseClient()
 
+// Authenticated fetch helper — adds the Supabase access token as Bearer header
+export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token
+
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+}
+
 // For server-side operations
 export const createServerClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL

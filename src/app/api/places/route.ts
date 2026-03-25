@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     // Apply search filter
     if (search.trim()) {
       // Use Supabase text search - search in name, city, state
-      query = query.or(`name.ilike.%${search}%,location_city.ilike.%${search}%,location_state.ilike.%${search}%`)
+      query = query.or(`name.ilike.%${search}%,city.ilike.%${search}%,state.ilike.%${search}%`)
     }
 
     // Apply type filter
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Apply pagination and ordering
     query = query
-      .order('rank_overall', { ascending: false })
+      .order('rank_overall', { ascending: true })
       .order('name', { ascending: true })
       .range(offset, offset + limit - 1)
 
@@ -82,12 +82,12 @@ export async function GET(request: NextRequest) {
         name: place.name,
         type: place.type,
         institution: place.institution,
-        city: place.location_city,
-        state: place.location_state,
-        country: place.location_country,
-        location_city: place.location_city,
-        location_state: place.location_state,
-        location_country: place.location_country,
+        city: place.city,
+        state: place.state,
+        country: place.country,
+        location_city: place.city,
+        location_state: place.state,
+        location_country: place.country,
         lat: place.lat,
         lng: place.lng,
         photo_url: place.photo_url,
