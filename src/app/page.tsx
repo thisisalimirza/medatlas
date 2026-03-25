@@ -20,6 +20,7 @@ export default function HomePage() {
   const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(false) // Default closed; users open via filter button
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
   const [isFiltering, setIsFiltering] = useState(false)
+  const [sortByRank, setSortByRank] = useState(false)
 
   useEffect(() => {
     fetchPlaces()
@@ -198,6 +199,10 @@ export default function HomePage() {
     return true
   })
 
+  const displayedPlaces = sortByRank
+    ? [...filteredPlaces].sort((a, b) => (a.rank_overall ?? 9999) - (b.rank_overall ?? 9999))
+    : filteredPlaces
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Payment Success Notification */}
@@ -348,31 +353,18 @@ export default function HomePage() {
                     <span className="group-hover:scale-110 transition-transform">📊</span>
                     <span>Compare</span>
                   </button>
-                  <button 
-                    onClick={() => {
-                      // Sort by rank and scroll to top
-                      const sortedPlaces = [...filteredPlaces].sort((a, b) => (a.rank_overall || 1) - (b.rank_overall || 1))
-                      setPlaces([...places.filter(p => !filteredPlaces.includes(p)), ...sortedPlaces])
-                      window.scrollTo({ top: 0, behavior: 'smooth' })
-                    }}
-                    className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  <button
+                    onClick={() => setSortByRank(v => !v)}
+                    className={`px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                      sortByRank
+                        ? 'border-red-600 text-red-700 bg-red-50'
+                        : 'border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50'
+                    }`}
                   >
                     <span className="flex items-center space-x-1">
                       <span className="group-hover:scale-110 transition-transform">🏆</span>
                       <span className="hidden xs:inline">By Rank</span>
                       <span className="xs:hidden">Rank</span>
-                    </span>
-                  </button>
-                  <button 
-                    onClick={() => {
-                      alert('🗺️ Map view coming soon! This will show all medical schools on an interactive map.')
-                    }}
-                    className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                  >
-                    <span className="flex items-center space-x-1">
-                      <span className="group-hover:scale-110 transition-transform">📍</span>
-                      <span className="hidden xs:inline">Map View</span>
-                      <span className="xs:hidden">Map</span>
                     </span>
                   </button>
                 </div>
@@ -398,7 +390,7 @@ export default function HomePage() {
               </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-                {filteredPlaces.map((place) => (
+                {displayedPlaces.map((place) => (
                   <PlaceCard
                     key={place.id}
                     place={place}
