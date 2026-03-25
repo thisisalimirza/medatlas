@@ -192,10 +192,10 @@
 
     .modal-content {
       border-radius: 0;
-      height: 100dvh;
-      height: 100vh;
-      max-height: 100dvh;
+      height: 100vh;    /* fallback for older Safari */
+      height: 100dvh;   /* dvh shrinks when URL bar is visible — must come AFTER vh */
       max-height: 100vh;
+      max-height: 100dvh;
       margin: 0;
       width: 100%;
       padding-top: env(safe-area-inset-top, 0px);
