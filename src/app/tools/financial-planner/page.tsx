@@ -101,12 +101,12 @@ export default function FinancialPlannerPage() {
         )}
 
         {/* Tab nav */}
-        <nav className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit overflow-x-auto max-w-full mb-6">
+        <nav className="flex gap-1 bg-gray-100 rounded-xl p-1 overflow-x-auto max-w-full mb-6 scrollbar-hide">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 flex-shrink-0 px-2.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-white text-red-700 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'

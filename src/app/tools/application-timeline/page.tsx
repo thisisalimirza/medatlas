@@ -235,7 +235,7 @@ export default function ApplicationTimelinePage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-8">
           <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
             <div className="text-sm text-gray-600">Total Tasks</div>
@@ -319,21 +319,21 @@ export default function ApplicationTimelinePage() {
           {filteredTimeline.map((item, index) => (
             <div
               key={item.id}
-              className={`bg-white rounded-lg border-2 p-6 transition-all hover:shadow-md ${getStatusColor(item.status)}`}
+              className={`bg-white rounded-lg border-2 p-4 sm:p-6 transition-all hover:shadow-md ${getStatusColor(item.status)}`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <span className="text-2xl">{getCategoryIcon(item.category)}</span>
-                    <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                    <span className={`text-sm font-medium ${getPriorityColor(item.priority)}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start gap-2 mb-2 flex-wrap">
+                    <span className="text-xl flex-shrink-0">{getCategoryIcon(item.category)}</span>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex-1 min-w-0">{item.title}</h3>
+                    <span className={`text-xs font-medium flex-shrink-0 ${getPriorityColor(item.priority)}`}>
                       {item.priority.toUpperCase()}
                     </span>
                   </div>
-                  
-                  <p className="text-gray-700 mb-3">{item.description}</p>
-                  
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+
+                  <p className="text-sm text-gray-700 mb-3">{item.description}</p>
+
+                  <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-600">
                     <span>📅 {new Date(item.deadline).toLocaleDateString()}</span>
                     {item.daysUntil !== undefined && (
                       <span>
@@ -348,8 +348,8 @@ export default function ApplicationTimelinePage() {
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
-                  <div className="text-right text-sm">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="text-right text-xs sm:text-sm">
                     <div className={`font-medium ${
                       item.status === 'completed' ? 'text-green-600' :
                       item.status === 'current' ? 'text-blue-600' :

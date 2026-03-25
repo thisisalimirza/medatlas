@@ -148,7 +148,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
       >
         {/* ────────────────────── LOGIN STEP ────────────────────── */}
         {step === 'login' && (
-          <div className="p-6">
+          <div className="p-6 overflow-y-auto overscroll-contain flex-1 min-h-0">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
@@ -278,7 +278,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
 
         {/* ────────────────────── PAYWALL STEP ────────────────────── */}
         {step === 'paywall' && (
-          <div className="p-6">
+          <div className="p-6 overflow-y-auto overscroll-contain flex-1 min-h-0">
             {/* Header */}
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -449,7 +449,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
 
         {/* ────────────────────── SENT STEP ────────────────────── */}
         {step === 'sent' && (
-          <div className="p-6">
+          <div className="p-6 overflow-y-auto overscroll-contain flex-1 min-h-0">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl">&#x1F4E7;</span>

@@ -117,6 +117,15 @@
     overflow: hidden;
   }
 
+  /* Hide scrollbar utility (tabs row on mobile) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Smooth scrollbar styling */
   ::-webkit-scrollbar {
     width: 6px;
@@ -176,9 +185,20 @@
       font-size: 0.875rem;
     }
     
+    .modal-overlay {
+      align-items: flex-end;
+      padding: 0;
+    }
+
     .modal-content {
-      margin: 0.5rem;
-      max-height: 95vh;
+      border-radius: 0;
+      height: 100vh;    /* fallback for older Safari */
+      height: 100dvh;   /* dvh shrinks when URL bar is visible — must come AFTER vh */
+      max-height: 100vh;
+      max-height: 100dvh;
+      margin: 0;
+      width: 100%;
+      padding-top: env(safe-area-inset-top, 0px);
     }
     
     .card {

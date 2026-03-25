@@ -166,25 +166,23 @@ export default function SchoolComparisonPage() {
         </div>
 
         {/* School Selection */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Selected Schools ({selectedSchools.length}/4)</h2>
-            <div className="flex items-center space-x-4">
-              <select
-                onChange={(e) => e.target.value && addSchool(e.target.value)}
-                value=""
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent text-sm"
-              >
-                <option value="">Add a school...</option>
-                {availableSchools
-                  .filter(school => !selectedSchools.find(s => s.id === school.id))
-                  .map(school => (
-                    <option key={school.id} value={school.id}>
-                      {school.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Selected Schools ({selectedSchools.length}/4)</h2>
+            <select
+              onChange={(e) => e.target.value && addSchool(e.target.value)}
+              value=""
+              className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent text-sm"
+            >
+              <option value="">Add a school...</option>
+              {availableSchools
+                .filter(school => !selectedSchools.find(s => s.id === school.id))
+                .map(school => (
+                  <option key={school.id} value={school.id}>
+                    {school.name}
+                  </option>
+                ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -209,7 +207,7 @@ export default function SchoolComparisonPage() {
         </div>
 
         {/* View Toggle */}
-        <div className="flex space-x-2 mb-6">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-6">
           {[
             { key: 'overview', label: 'Overview' },
             { key: 'detailed', label: 'Detailed Comparison' },
@@ -218,7 +216,7 @@ export default function SchoolComparisonPage() {
             <button
               key={view.key}
               onClick={() => setComparisonView(view.key as any)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`flex-shrink-0 px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
                 comparisonView === view.key
                   ? 'bg-brand-red text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'

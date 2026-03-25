@@ -274,14 +274,14 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
       case 'scores':
         return (
           <div className="p-6">
-            {/* Overall Score like nomad */}
-            <div className="mb-8 p-6 bg-gradient-to-r from-brand-red to-red-600 rounded-xl text-white">
-              <div className="text-center">
-                <div className="text-4xl font-bold mb-2">
-                  {((place.scores.quality_of_training + place.scores.match_strength + place.scores.community_score + place.scores.lifestyle) / 4).toFixed(1)}
-                </div>
-                <div className="text-lg font-medium opacity-90">Overall Score</div>
-                <div className="text-sm opacity-75 mt-1">Based on 4 key factors</div>
+            {/* Overall Score — compact horizontal */}
+            <div className="mb-5 px-4 py-3 bg-gradient-to-r from-brand-red to-red-600 rounded-xl text-white flex items-center gap-4">
+              <div className="text-4xl font-bold leading-none">
+                {((place.scores.quality_of_training + place.scores.match_strength + place.scores.community_score + place.scores.lifestyle) / 4).toFixed(1)}
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Overall Score</div>
+                <div className="text-xs opacity-75">Based on 4 key factors</div>
               </div>
             </div>
 
@@ -840,111 +840,92 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
       <div className="modal-content flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex-shrink-0 bg-white border-b border-gray-200">
-          {/* Image Section */}
-          <div className="relative h-40 sm:h-48 bg-gray-200 overflow-hidden">
+          {/* Top bar — always visible close button + school name + actions */}
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100">
+            <button
+              onClick={onClose}
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+              aria-label="Close"
+            >
+              <span className="text-xl leading-none">←</span>
+            </button>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm font-semibold text-gray-900 truncate">{place.name}</h1>
+              <p className="text-xs text-gray-500">{place.city}, {place.state}</p>
+            </div>
+            {/* Action buttons */}
+            {user && user.is_paid && (
+              <button
+                onClick={toggleFavorite}
+                disabled={favoritesLoading}
+                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 transition-colors"
+                title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+              >
+                <span className="text-base">{favoritesLoading ? '⏳' : isFavorited ? '❤️' : '🤍'}</span>
+              </button>
+            )}
+            {!user ? (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="flex-shrink-0 bg-brand-red hover:bg-red-600 text-white font-semibold px-3 py-1.5 rounded-full text-xs transition-colors whitespace-nowrap"
+              >
+                Join
+              </button>
+            ) : !user.is_paid ? (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="flex-shrink-0 bg-brand-red hover:bg-red-600 text-white font-semibold px-3 py-1.5 rounded-full text-xs transition-colors whitespace-nowrap"
+              >
+                Upgrade
+              </button>
+            ) : !isInSchoolList ? (
+              <button
+                onClick={() => setShowSchoolListModal(true)}
+                disabled={schoolListLoading}
+                className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded-full text-xs transition-colors disabled:opacity-50 whitespace-nowrap"
+              >
+                {schoolListLoading ? '⏳' : '+ List'}
+              </button>
+            ) : (
+              <div className="flex-shrink-0 bg-blue-50 text-blue-700 font-medium px-2.5 py-1 rounded-full text-xs whitespace-nowrap">
+                ✓ Listed
+              </div>
+            )}
+          </div>
+
+          {/* Image Section — decorative, shorter */}
+          <div className="relative h-36 sm:h-44 bg-gray-200 overflow-hidden">
             <Image
               src={imageUrl}
               alt={place.name}
               fill
-              className="object-cover"
+              className="object-cover object-center"
             />
-            {/* Overlay with basic info */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-6 text-white">
-              <h1 className="text-3xl font-bold mb-1">{place.name}</h1>
-              <p className="text-lg opacity-90">{place.city}, {place.state}</p>
-              <p className="text-sm opacity-75">{place.institution}</p>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
             {/* Image credit */}
             {shouldShowCredit && (
-              <div className="absolute bottom-2 right-2 text-xs text-white/60">
+              <div className="absolute bottom-1.5 right-2 text-xs text-white/40">
                 {sampleImage.credit}
               </div>
             )}
           </div>
 
-          {/* Title Section */}
-          <div className="px-6 pt-4 pb-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                {user && user.is_paid && (
-                  <button
-                    onClick={toggleFavorite}
-                    disabled={favoritesLoading}
-                    className={`p-2 rounded-full transition-all duration-200 hover:bg-red-50 group ${
-                      isFavorited
-                        ? 'text-red-500 hover:text-red-600'
-                        : 'text-gray-400 hover:text-red-500'
-                    } ${favoritesLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    <span className="text-lg group-hover:scale-110 transition-transform inline-block">
-                      {favoritesLoading ? '⏳' : isFavorited ? '❤️' : '🤍'}
-                    </span>
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center space-x-2">
-                {!user ? (
-                  <button 
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-brand-red hover:bg-red-600 text-white font-medium px-4 py-2 rounded-full text-sm transition-colors"
-                  >
-                    Join community in {place.city}
-                  </button>
-                ) : !user.is_paid ? (
-                  <button 
-                    onClick={() => setIsAuthModalOpen(true)}
-                    className="bg-brand-red hover:bg-red-600 text-white font-medium px-4 py-2 rounded-full text-sm transition-colors"
-                  >
-                    Upgrade to Pro
-                  </button>
-                ) : (
-                  <>
-                    {!isInSchoolList ? (
-                      <button 
-                        onClick={() => setShowSchoolListModal(true)}
-                        disabled={schoolListLoading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-full text-sm transition-colors disabled:opacity-50"
-                      >
-                        {schoolListLoading ? '⏳' : '📋 Add to School List'}
-                      </button>
-                    ) : (
-                      <div className="bg-blue-50 text-blue-700 font-medium px-3 py-1 rounded-full text-sm">
-                        ✓ In School List
-                      </div>
-                    )}
-                    <div className="bg-green-50 text-green-700 font-medium px-3 py-1 rounded-full text-sm">
-                      ✓ Pro Member
-                    </div>
-                  </>
-                )}
-                <button 
-                  onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-full transition-all duration-200 group"
-                >
-                  <span className="text-xl group-hover:scale-110 transition-transform inline-block">×</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Tabs - Cleaner design */}
-          <div className="px-6">
-            <div className="flex overflow-x-auto border-b border-gray-200">
+          {/* Tabs — horizontal scroll only, no scrollbar shown */}
+          <div className="overflow-hidden">
+            <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-200 px-2 sm:px-4">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => handleTabClick(tab.id)}
-                  className={`relative whitespace-nowrap px-4 py-3 transition-all duration-200 font-medium text-sm group ${
+                  className={`relative whitespace-nowrap flex-shrink-0 px-3 sm:px-4 py-2.5 font-medium text-xs sm:text-sm transition-colors ${
                     activeTab === tab.id
-                      ? 'text-brand-red border-b-2 border-brand-red -mb-px'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-brand-red border-b-2 border-brand-red'
+                      : 'text-gray-500 hover:text-gray-800'
                   }`}
                 >
                   {tab.label}
                   {!tab.free && !canInteractWithPremiumContent() && (
-                    <span className="ml-1 text-xs text-yellow-500 group-hover:scale-110 transition-transform inline-block">⭐</span>
+                    <span className="ml-1 text-xs text-yellow-500">⭐</span>
                   )}
                 </button>
               ))}

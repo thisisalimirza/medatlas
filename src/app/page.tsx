@@ -20,6 +20,7 @@ export default function HomePage() {
   const [isFiltersSidebarOpen, setIsFiltersSidebarOpen] = useState(false) // Default closed; users open via filter button
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
   const [isFiltering, setIsFiltering] = useState(false)
+  const [sortByRank, setSortByRank] = useState(false)
 
   useEffect(() => {
     fetchPlaces()
@@ -132,7 +133,8 @@ export default function HomePage() {
     
     // Tuition range filter
     if (filters.tuition_range) {
-      const tuition = place.tuition_in_state || place.tuition_out_state || 0
+      // metrics.tuition is the primary field; tuition_in_state/out_state are aliases
+      const tuition = place.tuition_in_state ?? place.tuition_out_state ?? (place.metrics as any)?.tuition ?? null
       const range = [
         { value: 'free', min: 0, max: 0 },
         { value: 'low', min: 0, max: 20000 },
@@ -140,34 +142,66 @@ export default function HomePage() {
         { value: 'high', min: 40000, max: 60000 },
         { value: 'very-high', min: 60000, max: 999999 }
       ].find(r => r.value === filters.tuition_range)
-      
+
       if (range) {
-        if (range.value === 'free' && tuition !== 0) return false
-        if (range.value !== 'free' && (tuition < range.min || tuition > range.max)) return false
+        if (range.value === 'free') {
+          if (tuition !== 0) return false
+        } else {
+          if (tuition === null || tuition < range.min || tuition > range.max) return false
+        }
       }
     }
     
+    // Financial aid filter — proxy: free tuition (metrics.financial_aid not yet in DB)
+    if (filters.financial_aid) {
+      const tuition = (place.metrics as any)?.tuition ?? place.tuition_in_state ?? null
+      if (!((place.metrics as any)?.financial_aid || tuition === 0)) return false
+    }
+
     // IMG friendly filter
     if (filters.img_friendly && !place.img_friendly) return false
-    
+
     // Location type filter
     if (filters.location_type && !place.tags.includes(filters.location_type)) return false
-    
-    // Institution type filter
-    if (filters.institution_type && !place.tags.includes(filters.institution_type)) return false
-    
-    // Region filter
-    if (filters.region && !place.tags.includes(filters.region)) return false
-    
-    // Specialization filters (these would typically be based on place.tags or metrics)
-    if (filters.strong_research && !place.tags.includes('research-focused')) return false
-    if (filters.primary_care && !place.tags.includes('primary-care')) return false
-    if (filters.rural_medicine && !place.tags.includes('rural-medicine')) return false
-    if (filters.small_class && place.metrics.class_size && place.metrics.class_size >= 100) return false
-    if (filters.highly_rated && place.scores.community_score < 8) return false
+
+    // Institution type filter — map UI values to actual tags in DB
+    if (filters.institution_type) {
+      const tagMap: Record<string, string> = {
+        public: 'public',
+        private: 'private',
+        research: 'research-heavy',
+        teaching: 'community-focused',
+      }
+      const tag = tagMap[filters.institution_type] || filters.institution_type
+      if (!place.tags.includes(tag)) return false
+    }
+
+    // Region filter — derive from state (no region tags in DB)
+    if (filters.region) {
+      const regionMap: Record<string, string[]> = {
+        northeast: ['ME','NH','VT','MA','RI','CT','NY','NJ','PA','MD','DE','DC'],
+        southeast: ['VA','WV','NC','SC','GA','FL','AL','MS','TN','KY','LA','AR'],
+        midwest:   ['OH','IN','IL','MI','WI','MN','IA','MO','ND','SD','NE','KS'],
+        southwest: ['TX','OK','NM','AZ'],
+        west:      ['CA','OR','WA','ID','MT','WY','CO','UT','NV','AK','HI'],
+      }
+      const states = regionMap[filters.region] || []
+      if (!states.includes(place.state)) return false
+    }
+
+    // Specialization filters — use actual tags present in DB
+    if (filters.strong_research && !place.tags.includes('research-heavy')) return false
+    if (filters.primary_care && !place.tags.includes('community-focused')) return false
+    if (filters.rural_medicine && !place.tags.includes('rural')) return false
+    // small_class: class_size not in DB yet — skip to avoid blocking all results
+    if (filters.highly_rated && (place.scores.community_score ?? 0) < 8) return false
     
     return true
   })
+
+  const displayedPlaces = sortByRank
+    ? [...filteredPlaces].sort((a, b) => (a.rank_overall ?? 9999) - (b.rank_overall ?? 9999))
+    : filteredPlaces
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -196,14 +230,14 @@ export default function HomePage() {
         {/* Sidebar Overlay — click to close on all screen sizes */}
         {isFiltersSidebarOpen && (
           <div
-            className="fixed inset-0 top-14 sm:top-16 bg-black/30 z-20 md:bg-transparent md:pointer-events-none"
+            className="fixed inset-0 bg-black/30 z-40 md:bg-transparent md:pointer-events-none"
             onClick={() => setIsFiltersSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar - Conditionally shown */}
         {isFiltersSidebarOpen && (
-          <div className="fixed md:relative top-14 sm:top-16 md:top-0 bottom-0 left-0 z-30 md:z-auto">
+          <div className="fixed md:relative top-0 bottom-0 left-0 z-50 md:z-auto">
             <FilterSidebar
               onFiltersChange={handleFiltersChange}
               currentFilters={filters}
@@ -214,11 +248,11 @@ export default function HomePage() {
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
-          {/* Page Header */}
-          <div className="bg-white border-b border-gray-200 p-3 sm:p-4 md:p-6">
+          {/* Page Header — scrolls away */}
+          <div className="bg-white p-3 sm:p-4 md:p-6 pb-0 sm:pb-0 md:pb-0">
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div className="mb-4 md:mb-0">
+                <div className="mb-2 md:mb-0">
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center space-x-2 sm:space-x-3">
                     <span>🏥</span>
                     <span>Medical Schools & Programs</span>
@@ -229,7 +263,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Stats - Show on mobile as horizontal row */}
-                <div className="flex md:hidden items-center justify-between space-x-4 mb-2">
+                <div className="flex md:hidden items-center space-x-4 mt-2 mb-1">
                   <div className="text-center">
                     <div className="text-sm font-bold text-brand-red">208+</div>
                     <div className="text-xs text-gray-500">Programs</div>
@@ -252,9 +286,13 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Search Bar and Filter Toggle */}
-              <div className="flex items-center gap-2 sm:gap-3 mt-4">
+          {/* Sticky Search + Filter Bar */}
+          <div className="sticky top-14 sm:top-16 z-30 bg-white border-b border-gray-200 shadow-sm">
+            <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setIsFiltersSidebarOpen(!isFiltersSidebarOpen)}
                   className={`flex-shrink-0 flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors rounded-lg border ${
@@ -272,21 +310,21 @@ export default function HomePage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search schools by name, city, or state..."
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-sm"
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-red focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 text-base sm:text-sm"
                   />
                   <div className="absolute right-3 top-2.5 text-gray-400 text-sm">🔍</div>
                 </div>
               </div>
             </div>
+            {/* Filter Summary lives inside the sticky bar */}
+            <FilterSummary
+              filters={filters}
+              onFilterChange={(key, value) => handleFiltersChange({...filters, [key]: value})}
+              onFiltersChange={handleFiltersChange}
+              onClearFilters={() => handleFiltersChange({})}
+              resultsCount={filteredPlaces.length}
+            />
           </div>
-
-        {/* Filter Summary */}
-        <FilterSummary
-          filters={filters}
-          onFilterChange={(key, value) => handleFiltersChange({...filters, [key]: value})}
-          onClearFilters={() => handleFiltersChange({})}
-          resultsCount={filteredPlaces.length}
-        />
 
           {/* Content Area */}
           <div className="p-3 sm:p-4 md:p-6">
@@ -315,31 +353,18 @@ export default function HomePage() {
                     <span className="group-hover:scale-110 transition-transform">📊</span>
                     <span>Compare</span>
                   </button>
-                  <button 
-                    onClick={() => {
-                      // Sort by rank and scroll to top
-                      const sortedPlaces = [...filteredPlaces].sort((a, b) => (a.rank_overall || 1) - (b.rank_overall || 1))
-                      setPlaces([...places.filter(p => !filteredPlaces.includes(p)), ...sortedPlaces])
-                      window.scrollTo({ top: 0, behavior: 'smooth' })
-                    }}
-                    className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  <button
+                    onClick={() => setSortByRank(v => !v)}
+                    className={`px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${
+                      sortByRank
+                        ? 'border-red-600 text-red-700 bg-red-50'
+                        : 'border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50'
+                    }`}
                   >
                     <span className="flex items-center space-x-1">
                       <span className="group-hover:scale-110 transition-transform">🏆</span>
                       <span className="hidden xs:inline">By Rank</span>
                       <span className="xs:hidden">Rank</span>
-                    </span>
-                  </button>
-                  <button 
-                    onClick={() => {
-                      alert('🗺️ Map view coming soon! This will show all medical schools on an interactive map.')
-                    }}
-                    className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold rounded-full border-2 border-gray-400 text-gray-700 hover:border-red-600 hover:text-red-700 hover:bg-red-50 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                  >
-                    <span className="flex items-center space-x-1">
-                      <span className="group-hover:scale-110 transition-transform">📍</span>
-                      <span className="hidden xs:inline">Map View</span>
-                      <span className="xs:hidden">Map</span>
                     </span>
                   </button>
                 </div>
@@ -365,7 +390,7 @@ export default function HomePage() {
               </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-                {filteredPlaces.map((place) => (
+                {displayedPlaces.map((place) => (
                   <PlaceCard
                     key={place.id}
                     place={place}

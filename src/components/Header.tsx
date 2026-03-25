@@ -161,14 +161,15 @@ export default function Header() {
                 </button>
                 
                 {/* Mobile login button */}
-                <button 
+                <button
                   onClick={() => {
                     setAuthModalMode('login')
                     setIsAuthModalOpen(true)
                   }}
-                  className="sm:hidden p-2 text-gray-700 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200"
+                  className="sm:hidden flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand-red hover:bg-red-50 rounded-lg transition-all duration-200"
                 >
-                  <span className="text-lg">🔑</span>
+                  <span className="text-base">🔑</span>
+                  <span>Log in</span>
                 </button>
                 
                 <button 

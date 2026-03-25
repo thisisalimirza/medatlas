@@ -184,10 +184,10 @@ export default function GradeTrackerPage() {
 
         {/* Tabs */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="flex gap-0 border-b border-gray-200">
+          <div className="flex gap-0 border-b border-gray-200 overflow-x-auto scrollbar-hide">
             {tabs.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                className={`flex-shrink-0 whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                 {tab.label}{tab.count !== undefined ? ` (${tab.count})` : ''}
               </button>
             ))}

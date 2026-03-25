@@ -5,11 +5,12 @@ import { useAuth } from '@/contexts/SupabaseAuthContext'
 interface FilterSummaryProps {
   filters: any
   onFilterChange: (key: string, value: any) => void
+  onFiltersChange: (filters: any) => void
   onClearFilters: () => void
   resultsCount: number
 }
 
-export default function FilterSummary({ filters, onFilterChange, onClearFilters, resultsCount }: FilterSummaryProps) {
+export default function FilterSummary({ filters, onFilterChange, onFiltersChange, onClearFilters, resultsCount }: FilterSummaryProps) {
   const { user } = useAuth()
   
   const activeFilters = Object.entries(filters).filter(([key, value]) => 
@@ -57,8 +58,8 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
       institution_type: {
         'public': 'Public',
         'private': 'Private',
-        'research': 'Research University',
-        'teaching': 'Teaching Focused'
+        'research': 'Research-Heavy',
+        'teaching': 'Community-Focused'
       },
       region: {
         'northeast': 'Northeast',
@@ -115,64 +116,72 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
   ]
 
   const applySuggestion = (suggestion: any) => {
-    onClearFilters()
-    Object.entries(suggestion.filters).forEach(([key, value]) => {
-      onFilterChange(key, value)
-    })
+    onFiltersChange(suggestion.filters)
   }
 
   return (
-    <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2 sm:py-3">
       <div className="max-w-6xl mx-auto">
-        {/* Smart Suggestions - Always show for easy access */}
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">
-            🤖 Smart Filter Suggestions
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            {smartSuggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => applySuggestion(suggestion)}
-                className="text-left p-3 border border-gray-200 rounded-lg hover:border-brand-red hover:bg-red-50 hover:shadow-sm transform hover:-translate-y-0.5 transition-all duration-200 group"
-              >
-                <div className="font-medium text-sm text-gray-900 group-hover:text-brand-red mb-1">
-                  {suggestion.label}
-                </div>
-                <div className="text-xs text-gray-600">
-                  {suggestion.description}
-                </div>
-              </button>
-            ))}
-          </div>
+        {/* Smart Suggestions — compact horizontal scroll on mobile, card grid on desktop */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide md:hidden pb-1">
+          <span className="text-xs text-gray-400 flex-shrink-0">Quick:</span>
+          {smartSuggestions.map((suggestion, index) => (
+            <button
+              key={index}
+              onClick={() => applySuggestion(suggestion)}
+              className="flex-shrink-0 px-2.5 py-1 border border-gray-200 rounded-full text-xs font-medium text-gray-700 hover:border-brand-red hover:bg-red-50 hover:text-brand-red transition-colors"
+            >
+              {suggestion.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Desktop: card grid */}
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
+          {smartSuggestions.map((suggestion, index) => (
+            <button
+              key={index}
+              onClick={() => applySuggestion(suggestion)}
+              className="text-left p-3 border border-gray-200 rounded-lg hover:border-brand-red hover:bg-red-50 hover:shadow-sm transition-all duration-200 group"
+            >
+              <div className="font-medium text-sm text-gray-900 group-hover:text-brand-red mb-1">
+                {suggestion.label}
+              </div>
+              <div className="text-xs text-gray-600">
+                {suggestion.description}
+              </div>
+            </button>
+          ))}
         </div>
 
         {/* Results Summary */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-between pt-1.5 sm:pt-3 sm:border-t sm:border-gray-100">
+          <div className="text-xs sm:text-sm text-gray-600">
             {resultsCount === 0 ? (
-              'No schools match your criteria'
+              'No schools match'
             ) : (
               <>
-                <span className="font-medium text-gray-900">{resultsCount}</span> medical school{resultsCount !== 1 ? 's' : ''} found
+                <span className="font-medium text-gray-900">{resultsCount}</span>
+                <span className="hidden sm:inline"> medical school{resultsCount !== 1 ? 's' : ''} found</span>
+                <span className="sm:hidden"> programs</span>
                 {activeFilters.length > 0 && (
-                  <span className="text-gray-500"> with {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''} applied</span>
+                  <span className="text-gray-500 hidden sm:inline"> with {activeFilters.length} filter{activeFilters.length !== 1 ? 's' : ''} applied</span>
                 )}
               </>
             )}
           </div>
-          
-          <div className="flex items-center space-x-4">
+
+          <div className="flex items-center gap-3">
             {activeFilters.length > 0 && (
               <button
                 onClick={onClearFilters}
-                className="text-xs text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-1.5 rounded-full font-medium transition-all duration-200"
+                className="text-xs text-red-600 hover:text-red-800 hover:bg-red-100 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium transition-all duration-200"
               >
-                Clear All Filters
+                Clear filters
               </button>
             )}
             {user && user.is_paid && resultsCount > 0 && (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 hidden sm:block">
                 💡 Add schools to favorites to track applications
               </div>
             )}

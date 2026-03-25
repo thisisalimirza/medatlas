@@ -174,7 +174,7 @@ export default function MatchStatsPage() {
 
         {/* Tabs */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex gap-0 border-b border-gray-200 overflow-x-auto">
+        <div className="flex gap-0 border-b border-gray-200 overflow-x-auto scrollbar-hide">
           {tabs.map(tab => (
             <button
               key={tab.id}
