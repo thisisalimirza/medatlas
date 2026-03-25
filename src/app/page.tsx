@@ -151,6 +151,9 @@ export default function HomePage() {
       }
     }
     
+    // Financial aid filter
+    if (filters.financial_aid && !(place.metrics as any)?.financial_aid) return false
+
     // IMG friendly filter
     if (filters.img_friendly && !place.img_friendly) return false
     

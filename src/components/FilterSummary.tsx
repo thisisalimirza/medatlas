@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext'
 interface FilterSummaryProps {
   filters: any
   onFilterChange: (key: string, value: any) => void
+  onFiltersChange: (filters: any) => void
   onClearFilters: () => void
   resultsCount: number
 }
@@ -115,10 +116,7 @@ export default function FilterSummary({ filters, onFilterChange, onClearFilters,
   ]
 
   const applySuggestion = (suggestion: any) => {
-    onClearFilters()
-    Object.entries(suggestion.filters).forEach(([key, value]) => {
-      onFilterChange(key, value)
-    })
+    onFiltersChange(suggestion.filters)
   }
 
   return (
