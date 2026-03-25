@@ -867,7 +867,7 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
                 </p>
               )}
             </div>
-            {/* Close button — top-right corner of image, clearly separate from CTAs */}
+            {/* Close button — top-right */}
             <button
               onClick={onClose}
               className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 backdrop-blur-sm"
@@ -875,63 +875,51 @@ export default function PlaceModal({ place, isOpen, onClose }: PlaceModalProps) 
             >
               <span className="text-lg leading-none">×</span>
             </button>
-            {/* Image credit */}
-            {shouldShowCredit && (
-              <div className="absolute bottom-2 right-2 text-xs text-white/50">
-                {sampleImage.credit}
-              </div>
-            )}
-          </div>
 
-          {/* CTA row — just the action buttons, no close button here */}
-          <div className="px-3 sm:px-6 py-2.5 flex items-center gap-2">
-            {user && user.is_paid && (
-              <button
-                onClick={toggleFavorite}
-                disabled={favoritesLoading}
-                className={`p-1.5 rounded-full transition-all duration-200 hover:bg-red-50 flex-shrink-0 ${
-                  isFavorited ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
-                } ${favoritesLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                <span className="text-lg">{favoritesLoading ? '⏳' : isFavorited ? '❤️' : '🤍'}</span>
-              </button>
-            )}
-            <div className="flex-1" />
-            {!user ? (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="bg-brand-red hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors whitespace-nowrap"
-              >
-                Join in {place.city}
-              </button>
-            ) : !user.is_paid ? (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="bg-brand-red hover:bg-red-600 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors whitespace-nowrap"
-              >
-                Upgrade to Pro
-              </button>
-            ) : (
-              <>
-                {!isInSchoolList ? (
-                  <button
-                    onClick={() => setShowSchoolListModal(true)}
-                    disabled={schoolListLoading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors disabled:opacity-50 whitespace-nowrap"
-                  >
-                    {schoolListLoading ? '⏳' : '📋 Add to List'}
-                  </button>
-                ) : (
-                  <div className="bg-blue-50 text-blue-700 font-medium px-3 py-1 rounded-full text-sm whitespace-nowrap">
-                    ✓ In List
-                  </div>
-                )}
-                <div className="hidden sm:block bg-green-50 text-green-700 font-medium px-3 py-1 rounded-full text-sm whitespace-nowrap">
-                  ✓ Pro Member
-                </div>
-              </>
-            )}
+            {/* Action buttons — bottom-right of image, above gradient */}
+            <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+              {user && user.is_paid && (
+                <button
+                  onClick={toggleFavorite}
+                  disabled={favoritesLoading}
+                  className="bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200"
+                  title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <span className="text-base leading-none">{favoritesLoading ? '⏳' : isFavorited ? '❤️' : '🤍'}</span>
+                </button>
+              )}
+              {!user ? (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="bg-brand-red hover:bg-red-600 text-white font-semibold px-3 py-1 rounded-full text-xs transition-colors whitespace-nowrap shadow-lg"
+                >
+                  Join in {place.city}
+                </button>
+              ) : !user.is_paid ? (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="bg-brand-red hover:bg-red-600 text-white font-semibold px-3 py-1 rounded-full text-xs transition-colors whitespace-nowrap shadow-lg"
+                >
+                  Upgrade to Pro
+                </button>
+              ) : (
+                <>
+                  {!isInSchoolList ? (
+                    <button
+                      onClick={() => setShowSchoolListModal(true)}
+                      disabled={schoolListLoading}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1 rounded-full text-xs transition-colors disabled:opacity-50 whitespace-nowrap shadow-lg"
+                    >
+                      {schoolListLoading ? '⏳' : '📋 Add to List'}
+                    </button>
+                  ) : (
+                    <div className="bg-black/40 backdrop-blur-sm text-white font-medium px-3 py-1 rounded-full text-xs whitespace-nowrap">
+                      ✓ In List
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
 
           {/* Tabs — horizontal scroll only, no scrollbar shown */}
