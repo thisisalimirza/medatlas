@@ -72,6 +72,7 @@ const navigationData: NavSection[] = [
       { icon: "💰", label: "Salary Negotiator", href: "/salary-negotiator", requiresAuth: true, requiresPaid: true },
       { icon: "📊", label: "Contract Analyzer", href: "/contracts", requiresAuth: true, requiresPaid: true },
       { icon: "🏛️", label: "Fellowship Finder", href: "/fellowships", requiresAuth: true, requiresPaid: true },
+      { icon: "🧪", label: "Test Value Predictor", href: "/tools/test-predictor" },
       { icon: "👨‍🏫", label: "Mentorship Hub", href: "/mentorship", requiresAuth: true }
     ]
   },
