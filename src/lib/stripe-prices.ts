@@ -72,8 +72,29 @@ export async function resolvePlanPrice(
 
   if (!price) {
     const envPriceId = process.env[PLAN_ENV_VARS[plan]]
-    if (!envPriceId) return null
-    price = await stripe.prices.retrieve(envPriceId)
+    if (!envPriceId) {
+      console.error(
+        `No Stripe price for plan "${plan}": lookup key "${lookupKey}" not found, and ${PLAN_ENV_VARS[plan]} is unset`
+      )
+      return null
+    }
+
+    try {
+      price = await stripe.prices.retrieve(envPriceId)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      console.error(
+        `No Stripe price for plan "${plan}": lookup key "${lookupKey}" not found, and env ${PLAN_ENV_VARS[plan]}=${envPriceId} failed (${message}). Update the Vercel env var to your new Price ID, or set the lookup key on the active Price.`
+      )
+      return null
+    }
+
+    if (price.active === false) {
+      console.error(
+        `Stripe price ${envPriceId} for plan "${plan}" is archived. Create a new Price, set lookup key "${lookupKey}", and update ${PLAN_ENV_VARS[plan]}.`
+      )
+      return null
+    }
   }
 
   if (!price || price.unit_amount == null) return null
