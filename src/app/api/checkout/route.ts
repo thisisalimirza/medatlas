@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-
-// Stripe Price IDs — set these in .env.local (test) and Vercel env vars (prod)
-// To switch between test/live: just swap STRIPE_SECRET_KEY and STRIPE_PRICE_* values
-const PRICE_IDS: Record<string, string | undefined> = {
-  annual: process.env.STRIPE_PRICE_ANNUAL,
-  '5year': process.env.STRIPE_PRICE_5YEAR,
-}
+import { getStripe, resolvePlanPrice, type PlanId } from '@/lib/stripe-prices'
 
 export async function POST(request: NextRequest) {
   try {
-    const secretKey = process.env.STRIPE_SECRET_KEY
-    if (!secretKey) {
+    let stripe
+    try {
+      stripe = getStripe()
+    } catch {
       console.error('STRIPE_SECRET_KEY is not set')
       return NextResponse.json(
         { success: false, error: 'Stripe is not configured. Set STRIPE_SECRET_KEY in env vars.' },
@@ -19,17 +14,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const stripe = new Stripe(secretKey)
-
     const body = await request.json()
-    const { plan = '5year' } = body
+    const plan = (body.plan === 'annual' ? 'annual' : '5year') as PlanId
 
-    const priceId = PRICE_IDS[plan] || PRICE_IDS['5year']
-    if (!priceId) {
-      const mode = secretKey.startsWith('sk_live') ? 'live' : 'test'
-      console.error(`STRIPE_PRICE_${plan.toUpperCase()} is not set. Current mode: ${mode}`)
+    const resolved = await resolvePlanPrice(stripe, plan)
+    if (!resolved) {
+      const mode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ? 'live' : 'test'
+      console.error(`No Stripe price found for plan "${plan}". Mode: ${mode}`)
       return NextResponse.json(
-        { success: false, error: `Price not configured for "${plan}" plan. Set STRIPE_PRICE_${plan === '5year' ? '5YEAR' : 'ANNUAL'} in env vars.` },
+        {
+          success: false,
+          error: `Price not configured for "${plan}" plan. Set a Stripe lookup key (medstack_${plan === '5year' ? '5year' : 'annual'}) or STRIPE_PRICE_${plan === '5year' ? '5YEAR' : 'ANNUAL'} in env vars.`,
+        },
         { status: 500 }
       )
     }
@@ -39,8 +35,7 @@ export async function POST(request: NextRequest) {
     const cancelUrl = `${baseUrl}/?canceled=true`
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: resolved.priceId, quantity: 1 }],
       mode: 'payment',
       success_url: successUrl,
       cancel_url: cancelUrl,

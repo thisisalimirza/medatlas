@@ -9,6 +9,24 @@ interface AuthModalProps {
   initialMode?: 'login' | 'signup'
 }
 
+interface PlanDisplay {
+  formatted: string
+  perYearFormatted?: string
+}
+
+interface LivePrices {
+  annual: PlanDisplay | null
+  '5year': PlanDisplay | null
+  savingsFormatted: string | null
+}
+
+/** Fallback display if /api/prices is unavailable — checkout still uses Stripe. */
+const FALLBACK_PRICES: LivePrices = {
+  annual: { formatted: '$60' },
+  '5year': { formatted: '$100', perYearFormatted: '$20' },
+  savingsFormatted: '$200',
+}
+
 export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: AuthModalProps) {
   const [selectedPlan, setSelectedPlan] = useState<'5year' | 'annual'>('5year')
   const [errors, setErrors] = useState<string[]>([])
@@ -17,6 +35,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
   const [loginMethod, setLoginMethod] = useState<'magic' | 'password'>('magic')
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [prices, setPrices] = useState<LivePrices>(FALLBACK_PRICES)
   const { sendMagicLink, signInWithPassword } = useAuth()
 
   // Fix: sync step with initialMode whenever the modal opens
@@ -31,7 +50,42 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
     }
   }, [isOpen, initialMode])
 
+  // Load live amounts from Stripe (via Price IDs / lookup keys)
+  useEffect(() => {
+    let cancelled = false
+
+    fetch('/api/prices')
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled || !data.success || !data.plans) return
+        setPrices({
+          annual: data.plans.annual
+            ? { formatted: data.plans.annual.formatted }
+            : FALLBACK_PRICES.annual,
+          '5year': data.plans['5year']
+            ? {
+                formatted: data.plans['5year'].formatted,
+                perYearFormatted: data.plans['5year'].perYearFormatted,
+              }
+            : FALLBACK_PRICES['5year'],
+          savingsFormatted: data.savingsFormatted ?? FALLBACK_PRICES.savingsFormatted,
+        })
+      })
+      .catch(() => {
+        /* keep fallbacks */
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   if (!isOpen) return null
+
+  const fiveYearPrice = prices['5year']?.formatted ?? FALLBACK_PRICES['5year']!.formatted
+  const annualPrice = prices.annual?.formatted ?? FALLBACK_PRICES.annual!.formatted
+  const fiveYearPerYear = prices['5year']?.perYearFormatted
+  const savingsLabel = prices.savingsFormatted
 
   const handleCheckout = async () => {
     setLoading(true)
@@ -358,8 +412,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                     <div className="text-sm text-gray-500">Covers premed through residency</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900">$100</div>
-                    <div className="text-xs text-green-600 font-medium">just $20/yr</div>
+                    <div className="text-2xl font-bold text-gray-900">{fiveYearPrice}</div>
+                    {fiveYearPerYear && (
+                      <div className="text-xs text-green-600 font-medium">just {fiveYearPerYear}/yr</div>
+                    )}
                   </div>
                 </div>
 
@@ -390,7 +446,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
                     <div className="text-sm text-gray-500">1 year of full access</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900">$60</div>
+                    <div className="text-2xl font-bold text-gray-900">{annualPrice}</div>
                     <div className="text-xs text-gray-400 font-medium">per year</div>
                   </div>
                 </div>
@@ -408,10 +464,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
             </div>
 
             {/* Savings callout */}
-            {selectedPlan === '5year' && (
+            {selectedPlan === '5year' && savingsLabel && (
               <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 mb-5 text-center">
                 <span className="text-sm text-green-800 font-medium">
-                  You save $200 compared to 5 years of annual billing
+                  You save {savingsLabel} compared to 5 years of annual billing
                 </span>
               </div>
             )}
@@ -422,7 +478,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signup' }: A
               disabled={loading}
               className="w-full bg-red-500 text-white font-bold py-3.5 rounded-xl hover:bg-red-600 transition-all duration-200 text-lg shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Redirecting to checkout...' : `Continue — ${selectedPlan === '5year' ? '$100' : '$60/yr'}`}
+              {loading
+                ? 'Redirecting to checkout...'
+                : `Continue — ${selectedPlan === '5year' ? fiveYearPrice : `${annualPrice}/yr`}`}
             </button>
 
             {/* Existing user link */}
