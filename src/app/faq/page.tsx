@@ -1,81 +1,129 @@
 'use client'
 
 import Header from '@/components/Header'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-const faqs = [
-  {
-    category: "Getting Started",
-    items: [
-      {
-        question: "What is MedStack?",
-        answer: "MedStack is a comprehensive platform for pre-med students, medical students, residents, and attending physicians. We provide tools, resources, and community features to help you navigate your medical career journey."
-      },
-      {
-        question: "How much does MedStack cost?",
-        answer: "Starting at $20/year, MedStack Pro gives you full access to all premium features including detailed data, community access, and advanced tools."
-      },
-      {
-        question: "What's included in the free version?",
-        answer: "The free version includes basic school browsing, limited access to calculators, and the ability to view basic school information. Upgrading to Pro unlocks detailed reviews, advanced tools, and community features."
-      }
-    ]
-  },
-  {
-    category: "Pre-Med Tools",
-    items: [
-      {
-        question: "How accurate are the GPA and MCAT calculators?",
-        answer: "Our calculators use the most current AMCAS and AACOMAS conversion formulas. For MCAT scoring, we use official AAMC scoring guidelines. However, always verify with official sources for the most up-to-date information."
-      },
-      {
-        question: "Can I save my timeline and track progress?",
-        answer: "Yes! Pro users can save their custom premed timelines, mark completed tasks, and receive reminders for upcoming deadlines."
-      },
-      {
-        question: "How often are secondary essay prompts updated?",
-        answer: "We update secondary essay prompts as soon as schools release them each cycle, typically starting in May/June for the upcoming application cycle."
-      }
-    ]
-  },
-  {
-    category: "Account & Billing",
-    items: [
-      {
-        question: "Is there a money-back guarantee?",
-        answer: "Yes! We offer a 30-day money-back guarantee. If you're not satisfied with MedStack Pro, contact us within 30 days for a full refund."
-      },
-      {
-        question: "Can I change my stage (premed, MS1, etc.) later?",
-        answer: "Absolutely! You can update your stage anytime in your profile settings. This will customize the tools and content shown to match your current level."
-      },
-      {
-        question: "Do you offer student discounts?",
-        answer: "Our plans start at just $20/year with the 5-year option. We believe in making medical education resources affordable for all students."
-      }
-    ]
-  },
-  {
-    category: "Technical Support",
-    items: [
-      {
-        question: "I'm having trouble logging in. What should I do?",
-        answer: "First, try refreshing the page and clearing your browser cache. If issues persist, check that you're using the correct email address. Contact support if you continue having problems."
-      },
-      {
-        question: "Can I access MedStack on mobile?",
-        answer: "Yes! MedStack is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for an even better experience."
-      },
-      {
-        question: "How do I report a bug or suggest a feature?",
-        answer: "We love feedback! Join our Telegram community or email us directly. We actively monitor suggestions and regularly implement user-requested features."
-      }
-    ]
-  }
-]
+type PricingCopy = {
+  startingPerYear: string
+  annual: string
+  fiveYear: string
+}
+
+const DEFAULT_PRICING: PricingCopy = {
+  startingPerYear: '$20',
+  annual: '$60',
+  fiveYear: '$100',
+}
+
+function buildFaqs(pricing: PricingCopy) {
+  return [
+    {
+      category: 'Getting Started',
+      items: [
+        {
+          question: 'What is MedStack?',
+          answer:
+            'MedStack is a comprehensive platform for pre-med students, medical students, residents, and attending physicians. We provide tools, resources, and community features to help you navigate your medical career journey.',
+        },
+        {
+          question: 'How much does MedStack cost?',
+          answer: `MedStack Pro is ${pricing.annual}/year, or ${pricing.fiveYear} for 5-year access (about ${pricing.startingPerYear}/year). Pro unlocks detailed data, community access, and advanced tools.`,
+        },
+        {
+          question: "What's included in the free version?",
+          answer:
+            'The free version includes basic school browsing, limited access to calculators, and the ability to view basic school information. Upgrading to Pro unlocks detailed reviews, advanced tools, and community features.',
+        },
+      ],
+    },
+    {
+      category: 'Pre-Med Tools',
+      items: [
+        {
+          question: 'How accurate are the GPA and MCAT calculators?',
+          answer:
+            'Our calculators use the most current AMCAS and AACOMAS conversion formulas. For MCAT scoring, we use official AAMC scoring guidelines. However, always verify with official sources for the most up-to-date information.',
+        },
+        {
+          question: 'Can I save my timeline and track progress?',
+          answer:
+            'Yes! Pro users can save their custom premed timelines, mark completed tasks, and receive reminders for upcoming deadlines.',
+        },
+        {
+          question: 'How often are secondary essay prompts updated?',
+          answer:
+            'We update secondary essay prompts as soon as schools release them each cycle, typically starting in May/June for the upcoming application cycle.',
+        },
+      ],
+    },
+    {
+      category: 'Account & Billing',
+      items: [
+        {
+          question: 'Is there a money-back guarantee?',
+          answer:
+            "Yes! We offer a 30-day money-back guarantee. If you're not satisfied with MedStack Pro, contact us within 30 days for a full refund.",
+        },
+        {
+          question: 'Can I change my stage (premed, MS1, etc.) later?',
+          answer:
+            'Absolutely! You can update your stage anytime in your profile settings. This will customize the tools and content shown to match your current level.',
+        },
+        {
+          question: 'Do you offer student discounts?',
+          answer: `Our plans start at just ${pricing.startingPerYear}/year with the 5-year option (${pricing.fiveYear} total). We believe in making medical education resources affordable for all students.`,
+        },
+      ],
+    },
+    {
+      category: 'Technical Support',
+      items: [
+        {
+          question: "I'm having trouble logging in. What should I do?",
+          answer:
+            "First, try refreshing the page and clearing your browser cache. If issues persist, check that you're using the correct email address. Contact support if you continue having problems.",
+        },
+        {
+          question: 'Can I access MedStack on mobile?',
+          answer:
+            "Yes! MedStack is fully responsive and works great on mobile devices. We're also working on dedicated mobile apps for an even better experience.",
+        },
+        {
+          question: 'How do I report a bug or suggest a feature?',
+          answer:
+            'We love feedback! Join our Telegram community or email us directly. We actively monitor suggestions and regularly implement user-requested features.',
+        },
+      ],
+    },
+  ]
+}
 
 export default function FAQPage() {
   const [openItems, setOpenItems] = useState<string[]>([])
+  const [pricing, setPricing] = useState<PricingCopy>(DEFAULT_PRICING)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/prices')
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled || !data.success || !data.plans) return
+        setPricing({
+          startingPerYear:
+            data.plans['5year']?.perYearFormatted ?? DEFAULT_PRICING.startingPerYear,
+          annual: data.plans.annual?.formatted ?? DEFAULT_PRICING.annual,
+          fiveYear: data.plans['5year']?.formatted ?? DEFAULT_PRICING.fiveYear,
+        })
+      })
+      .catch(() => {
+        /* keep defaults */
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const faqs = useMemo(() => buildFaqs(pricing), [pricing])
 
   const toggleItem = (id: string) => {
     setOpenItems(prev => 

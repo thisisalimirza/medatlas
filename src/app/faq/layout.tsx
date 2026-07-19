@@ -30,7 +30,7 @@ const faqJsonLd = {
       name: 'How much does MedStack cost?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Starting at $20/year, MedStack Pro gives you full access to all premium features including detailed data, community access, and advanced tools.',
+        text: 'MedStack Pro offers annual and multi-year plans with full access to all premium features including detailed data, community access, and advanced tools. Current pricing is shown at checkout.',
       },
     },
     {
